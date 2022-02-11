@@ -1,0 +1,2555 @@
+----------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/levantisgio/Desktop/solo.log
+  log type:  text
+ opened on:   9 Jun 2020, 19:35:02
+
+. do "/var/folders/f5/w4lgh9q53kgdbgm_xmpbq1x40000gn/T//SD02085.000000"
+
+. 
+. *** PANEL DATA ANALYSIS ***
+. 
+. use "/Users/levantisgio/Desktop/solo.dta", clear
+
+. 
+. merge 1:1 Time TimeCode CountryName CountryCode using "/Users/levantisgio/Desktop/solo2.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               338  (_merge==3)
+    -----------------------------------------
+
+. drop _merge
+
+. merge 1:1 Time TimeCode CountryName CountryCode using "/Users/levantisgio/Desktop/solo3.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               338  (_merge==3)
+    -----------------------------------------
+
+. drop _merge
+
+. merge 1:1 Time TimeCode CountryName CountryCode using "/Users/levantisgio/Desktop/solo4.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               338  (_merge==3)
+    -----------------------------------------
+
+. drop _merge
+
+. merge 1:1 Time TimeCode CountryName CountryCode using "/Users/levantisgio/Desktop/solo5.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                               338  (_merge==3)
+    -----------------------------------------
+
+. drop TimeCode CountryCode _merge
+
+. 
+. rename Time year
+
+. rename CountryName country
+
+. rename GDPgrowthannualNYGDPMK GDPgr
+
+. rename Grossfixedcapitalformation GFCF
+
+. rename Grossfixedcapitalformationa GFCFann
+
+. rename Centralgovernmentdebttotal debt
+
+. rename Foreigndirectinvestmentneti fdi
+
+. rename Generalgovernmentfinalconsump ggfce
+
+. rename LaborforcetotalSLTLFTOTL lf
+
+. rename Laborforceparticipationrate lf1564
+
+. rename MerchandisetradeofGDPTG trade
+
+. rename Populationages65andabove Pop65
+
+. rename PopulationgrowthannualSP Popgr
+
+. rename Ruralpopulationoftotalpop rural
+
+. rename InflationGDPdeflatorannual inflation
+
+. rename PM25airpollutionmeanannual pollution
+
+. rename TaxrevenueofGDPGCTAXT tax
+
+. rename Totalnaturalresourcesrents tnrr
+
+. rename Exportsofgoodsandservices Exports
+
+. rename Importsofgoodsandservices Imports
+
+. rename DepositinterestrateFRIN DIR
+
+. rename GrossdomesticsavingsofGDP Savings
+
+. rename RealinterestrateFRINRR RIR
+
+. rename FinalConsumptionofGDP FC
+
+. 
+. label variable GDPgr "GDP growth (annual %)"
+
+. label variable GFCF "Gross fixed capital formation (% of GDP)"
+
+. label variable GFCFann "Gross fixed capital formation (annual % growth)"
+
+. label variable debt "Central government debt, total (% of GDP)"
+
+. label variable fdi "Foreign direct investment, net inflows (% of GDP)"
+
+. label variable ggfce "General government final consumption expenditure (% of GDP) "
+
+. label variable lf "Labor force, total "
+
+. label variable lf1564 "Labor force participation rate, total (% of total population ages 15-
+> 64) "
+
+. label variable trade "Merchandise trade (% of GDP)"
+
+. label variable Pop65 "Population ages 65 and above (% of total population) "
+
+. label variable Popgr "Population growth (annual %) "
+
+. label variable rural "Rural population (% of total population) "
+
+. label variable inflation "Inflation, GDP deflator (annual %)"
+
+. label variable pollution "PM2.5 air pollution, mean annual exposure (micrograms per cubic me
+> ter)"
+
+. label variable tax "Tax revenue (% of GDP)"
+
+. label variable tnrr "Total natural resources rents (% of GDP)"
+
+. label variable Exports "Exports of goods and services (% of GDP)"
+
+. label variable Imports "Imports of goods and services (% of GDP)"
+
+. label variable Inflationconsumerpricesannu "Inflation, consumer prices (annual %) "
+
+. label variable DIR "Deposit interest rate (%) "
+
+. label variable Savings "Gross domestic savings (% of GDP)"
+
+. label variable RIR "Real interest rate (%)"
+
+. 
+. *** MANAGING DATA***
+. 
+. sort country year
+
+. encode country, gen( countryname_)
+
+. drop country
+
+. rename countryname_ country
+
+. order year country
+
+. 
+. xtset country year //SET THE DATA TO PANEL FORMAT 
+       panel variable:  country (strongly balanced)
+        time variable:  year, 1993 to 2018
+                delta:  1 unit
+
+. sort country year
+
+. bysort country: gen gr_lf = [(lf-L.lf)/L.lf]*100
+(13 missing values generated)
+
+. 
+. gen debt2 = debt^2
+
+. gen dTrade = Exports - Imports
+
+. label variable gr_lf "Growth of labor force"
+
+. label variable debt2 "debt squared"
+
+. label variable dTrade " exports-imports (%) "
+
+. order year country GDPgr GFCF debt gr_lf inflation tax ggfce pollution dTrade
+
+. gen id = _n
+
+. sort country year
+
+. by country: egen average_infl =mean(inflation)
+
+. 
+. 
+. 
+. 
+. 
+.                                         *** GRAPHICAL ANALYSIS ***   
+. 
+. 
+.            //  HISTOGRAMS  //
+.                    
+. histogram GDPgr, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) lpattern(blank) ytitle(D
+> ensity) ytitle(, size(small) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labs
+> ize(small) labcolor("173 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67")
+>  tlength(vsmall) tposition(inside) grid glcolor("0 0 0")) ymtick(, labsize(medsmall) labcolo
+> r("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xt
+> itle(GDP Growth (%)) xtitle(, size(small) color("173 139 67") margin(medium)) xlabel(, label
+> s labsize(small) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tposit
+> ion(inside) grid glcolor("0 0 0")) title("Histogram of GDP growth (%)", size(large) color(wh
+> ite) margin(medsmall) box fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregio
+> n(margin(zero) fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(
+> black) lcolor("173 139 67") ifcolor(black) ilcolor("173 139 67"))          
+(bin=18, start=-11.700004, width=1.4569806)
+
+. histogram GDPgr, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) lpattern(blank) kdensity
+>  kdenopts(lcolor(white)) ytitle(Density) ytitle(, size(small) color("169 132 75")) yscale(lc
+> olor(black)) ylabel(, labels labsize(small) labcolor("173 139 67") angle(horizontal) labgap(
+> tiny) ticks tlcolor("173 139 67") tlength(vsmall) tposition(inside) grid glcolor("0 0 0")) y
+> mtick(, labsize(medsmall) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67
+> ") grid glcolor("173 139 67")) xtitle(GDP Growth (%)) xtitle(, size(small) color("173 139 67
+> ") margin(medium)) xlabel(, labels labsize(small) labcolor("173 139 67") angle(horizontal) t
+> icks tlcolor("173 139 67") tposition(inside) grid glcolor("0 0 0")) title("Histogram of GDP 
+> growth (%)", size(large) color(white) margin(medsmall) box fcolor(black) lcolor(white) bmarg
+> in(small)) legend(off) graphregion(margin(zero) fcolor(black) lcolor(black) ifcolor(black) i
+> lcolor(black)) plotregion(fcolor(black) lcolor("173 139 67") ifcolor(black) ilcolor("173 139
+>  67"))
+(bin=18, start=-11.700004, width=1.4569806)
+
+. histogram GDPgr, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) lpattern(blank) normal n
+> ormopts(lcolor(white) lpattern(vshortdash)) kdensity kdenopts(lcolor(white)) ytitle(Density)
+>  ytitle(, size(small) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(sma
+> ll) labcolor("173 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlengt
+> h(vsmall) tposition(inside) grid glcolor("0 0 0")) ymtick(, labsize(medsmall) labcolor("173 
+> 139 67") angle(horizontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(GD
+> P Growth (%)) xtitle(, size(small) color("173 139 67") margin(medium)) xlabel(, labels labsi
+> ze(small) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tposition(ins
+> ide) grid glcolor("0 0 0")) title("Histogram of GDP growth (%)", size(large) color(white) ma
+> rgin(medsmall) box fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregion(margi
+> n(zero) fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) 
+> lcolor("173 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=-11.700004, width=1.4569806)
+
+. 
+. histogram GFCF, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) ytitle(Density) ytitle(, 
+> size(small) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) labcol
+> or("173 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsmall) 
+> tposition(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67") ang
+> le(horizontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(GFCF (% of GDP
+> )) xtitle(, size(small) color("173 139 67") margin(medium)) xlabel(, labels labsize(small) l
+> abcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tposition(inside) grid g
+> lcolor("0 0 0")) title("Histogram of GFCF (% of GDP)", size(large) color(white) margin(medsm
+> all) box fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregion(margin(zero) fc
+> olor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor("17
+> 3 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=11.073565, width=1.5199802)
+
+. histogram GFCF, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) kdensity kdenopts(lcolor(
+> white)) ytitle(Density) ytitle(, size(small) color("169 132 75")) yscale(lcolor(black)) ylab
+> el(, labels labsize(small) labcolor("173 139 67") angle(horizontal) labgap(tiny) ticks tlcol
+> or("173 139 67") tlength(vsmall) tposition(inside) grid glcolor(black)) ymtick(, labsize(med
+> small) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") grid glcolor("17
+> 3 139 67")) xtitle(GFCF (% of GDP)) xtitle(, size(small) color("173 139 67") margin(medium))
+>  xlabel(, labels labsize(small) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 
+> 139 67") tposition(inside) grid glcolor("0 0 0")) title("Histogram of GFCF (% of GDP)", size
+> (large) color(white) margin(medsmall) box fcolor(black) lcolor(white) bmargin(small)) legend
+> (off) graphregion(margin(zero) fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) pl
+> otregion(fcolor(black) lcolor("173 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=11.073565, width=1.5199802)
+
+. histogram GFCF, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) normal normopts(lcolor(wh
+> ite) lpattern(vshortdash)) kdensity kdenopts(lcolor(white)) ytitle(Density) ytitle(, size(sm
+> all) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) labcolor("173
+>  139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsmall) tpositi
+> on(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67") angle(hori
+> zontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(GFCF (% of GDP)) xtit
+> le(, size(small) color("173 139 67") margin(medium)) xlabel(, labels labsize(small) labcolor
+> ("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tposition(inside) grid glcolor(
+> "0 0 0")) title("Histogram of GFCF (% of GDP)", size(large) color(white) margin(medsmall) bo
+> x fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregion(margin(zero) fcolor(bl
+> ack) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor("173 139 6
+> 7") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=11.073565, width=1.5199802)
+
+. 
+. histogram debt, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) ytitle(Density) ytitle(, 
+> size(small) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) labcol
+> or("173 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsmall) 
+> tposition(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67") ang
+> le(horizontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(Debt (% of GDP
+> )) xtitle(, size(small) color("173 139 67") margin(medium)) xlabel(, labels labsize(small) l
+> abcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tposition(inside) grid g
+> lcolor("0 0 0")) title("Histogram of Debt (% of GDP)", size(large) color(white) margin(medsm
+> all) box fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregion(margin(zero) fc
+> olor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor("17
+> 3 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=5.1878173, width=10.886621)
+
+. histogram debt, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) kdensity kdenopts(lcolor(
+> white)) ytitle(Density) ytitle(, size(small) color("169 132 75")) yscale(lcolor(black)) ylab
+> el(, labels labsize(small) labcolor("173 139 67") angle(horizontal) labgap(tiny) ticks tlcol
+> or("173 139 67") tlength(vsmall) tposition(inside) grid glcolor(black)) ymtick(, labsize(med
+> small) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") grid glcolor("17
+> 3 139 67")) xtitle(Debt (% of GDP)) xtitle(, size(small) color("173 139 67") margin(medium))
+>  xlabel(, labels labsize(small) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 
+> 139 67") tposition(inside) grid glcolor("0 0 0")) title("Histogram of Debt (% of GDP)", size
+> (large) color(white) margin(medsmall) box fcolor(black) lcolor(white) bmargin(small)) legend
+> (off) graphregion(margin(zero) fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) pl
+> otregion(fcolor(black) lcolor("173 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=5.1878173, width=10.886621)
+
+. histogram debt, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) normal normopts(lcolor(wh
+> ite) lpattern(vshortdash)) kdensity kdenopts(lcolor(white)) ytitle(Density) ytitle(, size(sm
+> all) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) labcolor("173
+>  139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsmall) tpositi
+> on(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67") angle(hori
+> zontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(Debt (% of GDP)) xtit
+> le(, size(small) color("173 139 67") margin(medium)) xlabel(, labels labsize(small) labcolor
+> ("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tposition(inside) grid glcolor(
+> "0 0 0")) title("Histogram of Debt (% of GDP)", size(large) color(white) margin(medsmall) bo
+> x fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregion(margin(zero) fcolor(bl
+> ack) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor("173 139 6
+> 7") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=5.1878173, width=10.886621)
+
+. 
+. histogram gr_lf, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) ytitle(Density) ytitle(,
+>  size(small) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) labco
+> lor("173 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsmall)
+>  tposition(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67") an
+> gle(horizontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(Growth of lab
+> or force (%)) xtitle(, size(small) color("173 139 67") margin(medium)) xlabel(, labels labsi
+> ze(small) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tposition(ins
+> ide) grid glcolor("0 0 0")) title("Histogram of Growth of Labor Force", size(large) color(wh
+> ite) margin(medsmall) box fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregio
+> n(margin(zero) fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(
+> black) lcolor("173 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=-4.406671, width=.87041741)
+
+. histogram gr_lf, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) kdensity kdenopts(lcolor
+> (white)) ytitle(Density) ytitle(, size(small) color("169 132 75")) yscale(lcolor(black)) yla
+> bel(, labels labsize(small) labcolor("173 139 67") angle(horizontal) labgap(tiny) ticks tlco
+> lor("173 139 67") tlength(vsmall) tposition(inside) grid glcolor(black)) ymtick(, labsize(me
+> dsmall) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") grid glcolor("1
+> 73 139 67")) xtitle(Growth of labor force (%)) xtitle(, size(small) color("173 139 67") marg
+> in(medium)) xlabel(, labels labsize(small) labcolor("173 139 67") angle(horizontal) ticks tl
+> color("173 139 67") tposition(inside) grid glcolor("0 0 0")) title("Histogram of Growth of L
+> abor Force", size(large) color(white) margin(medsmall) box fcolor(black) lcolor(white) bmarg
+> in(small)) legend(off) graphregion(margin(zero) fcolor(black) lcolor(black) ifcolor(black) i
+> lcolor(black)) plotregion(fcolor(black) lcolor("173 139 67") ifcolor(black) ilcolor("173 139
+>  67"))
+(bin=18, start=-4.406671, width=.87041741)
+
+. histogram gr_lf, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) normal normopts(lcolor(w
+> hite) lpattern(vshortdash)) kdensity kdenopts(lcolor(white)) ytitle(Density) ytitle(, size(s
+> mall) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) labcolor("17
+> 3 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsmall) tposit
+> ion(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67") angle(hor
+> izontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(Growth of labor forc
+> e (%)) xtitle(, size(small) color("173 139 67") margin(medium)) xlabel(, labels labsize(smal
+> l) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tposition(inside) gr
+> id glcolor("0 0 0")) title("Histogram of Growth of Labor Force", size(large) color(white) ma
+> rgin(medsmall) box fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregion(margi
+> n(zero) fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) 
+> lcolor("173 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=-4.406671, width=.87041741)
+
+. 
+. histogram inflation, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) ytitle(Density) ytit
+> le(, size(small) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) l
+> abcolor("173 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsm
+> all) tposition(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67"
+> ) angle(horizontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(Inflation
+>  rate (%)) xtitle(, size(small) color("173 139 67") margin(medium)) xlabel(, labels labsize(
+> small) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tposition(inside
+> ) grid glcolor("0 0 0")) title("Histogram of Inflation (annual%)", size(large) color(white) 
+> margin(medsmall) box fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregion(mar
+> gin(zero) fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black
+> ) lcolor("173 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=-4.0839304, width=108.32403)
+
+. histogram inflation, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) kdensity kdenopts(lc
+> olor(white)) ytitle(Density) ytitle(, size(small) color("169 132 75")) yscale(lcolor(black))
+>  ylabel(, labels labsize(small) labcolor("173 139 67") angle(horizontal) labgap(tiny) ticks 
+> tlcolor("173 139 67") tlength(vsmall) tposition(inside) grid glcolor(black)) ymtick(, labsiz
+> e(medsmall) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") grid glcolo
+> r("173 139 67")) xtitle(Inflation rate (%)) xtitle(, size(small) color("173 139 67") margin(
+> medium)) xlabel(, labels labsize(small) labcolor("173 139 67") angle(horizontal) ticks tlcol
+> or("173 139 67") tposition(inside) grid glcolor("0 0 0")) title("Histogram of Inflation (ann
+> ual%)", size(large) color(white) margin(medsmall) box fcolor(black) lcolor(white) bmargin(sm
+> all)) legend(off) graphregion(margin(zero) fcolor(black) lcolor(black) ifcolor(black) ilcolo
+> r(black)) plotregion(fcolor(black) lcolor("173 139 67") ifcolor(black) ilcolor("173 139 67")
+> )
+(bin=18, start=-4.0839304, width=108.32403)
+
+. histogram inflation, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) normal normopts(lcol
+> or(white) lpattern(vshortdash)) kdensity kdenopts(lcolor(white)) ytitle(Density) ytitle(, si
+> ze(small) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) labcolor
+> ("173 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsmall) tp
+> osition(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67") angle
+> (horizontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(Inflation rate (
+> %)) xtitle(, size(small) color("173 139 67") margin(medium)) xlabel(, labels labsize(small) 
+> labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tposition(inside) grid 
+> glcolor("0 0 0")) title("Histogram of Inflation (annual%)", size(large) color(white) margin(
+> medsmall) box fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregion(margin(zer
+> o) fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolo
+> r("173 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=-4.0839304, width=108.32403)
+
+. 
+. histogram tax, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) ytitle(Density) ytitle(, s
+> ize(small) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) labcolo
+> r("173 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsmall) t
+> position(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67") angl
+> e(horizontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(Tax Revenue (% 
+> of GDP)) xtitle(, size(small) color("173 139 67") margin(medium)) xlabel(, labels labsize(sm
+> all) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tposition(inside) 
+> grid glcolor("0 0 0")) title("Histogram of Taxes (% of GDP)", size(large) color(white) margi
+> n(medsmall) box fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregion(margin(z
+> ero) fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lco
+> lor("173 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=6.7652272, width=1.7215382)
+
+. histogram tax, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) kdensity kdenopts(lcolor(w
+> hite)) ytitle(Density) ytitle(, size(small) color("169 132 75")) yscale(lcolor(black)) ylabe
+> l(, labels labsize(small) labcolor("173 139 67") angle(horizontal) labgap(tiny) ticks tlcolo
+> r("173 139 67") tlength(vsmall) tposition(inside) grid glcolor(black)) ymtick(, labsize(meds
+> mall) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") grid glcolor("173
+>  139 67")) xtitle(Tax Revenue (% of GDP)) xtitle(, size(small) color("173 139 67") margin(me
+> dium)) xlabel(, labels labsize(small) labcolor("173 139 67") angle(horizontal) ticks tlcolor
+> ("173 139 67") tposition(inside) grid glcolor("0 0 0")) title("Histogram of Taxes (% of GDP)
+> ", size(large) color(white) margin(medsmall) box fcolor(black) lcolor(white) bmargin(small))
+>  legend(off) graphregion(margin(zero) fcolor(black) lcolor(black) ifcolor(black) ilcolor(bla
+> ck)) plotregion(fcolor(black) lcolor("173 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=6.7652272, width=1.7215382)
+
+. histogram tax, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) normal normopts(lcolor(whi
+> te) lpattern(vshortdash)) kdensity kdenopts(lcolor(white)) ytitle(Density) ytitle(, size(sma
+> ll) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) labcolor("173 
+> 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsmall) tpositio
+> n(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67") angle(horiz
+> ontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(Tax Revenue (% of GDP)
+> ) xtitle(, size(small) color("173 139 67") margin(medium)) xlabel(, labels labsize(small) la
+> bcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tposition(inside) grid gl
+> color("0 0 0")) title("Histogram of Taxes (% of GDP)", size(large) color(white) margin(medsm
+> all) box fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregion(margin(zero) fc
+> olor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor("17
+> 3 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=6.7652272, width=1.7215382)
+
+. 
+. histogram ggfce, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) ytitle(Density) ytitle(,
+>  size(small) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) labco
+> lor("173 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsmall)
+>  tposition(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67") an
+> gle(horizontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(GGFCE (% of G
+> DP)) xtitle(, size(small) color("173 139 67") margin(medium)) xlabel(, labels labsize(small)
+>  labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tposition(inside) grid
+>  glcolor("0 0 0")) title("Histogram of GGFCE (% of GDP)", size(large) color(white) margin(me
+> dsmall) box fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregion(margin(zero)
+>  fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(
+> "173 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=4.9973014, width=1.2627671)
+
+. histogram ggfce, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) kdensity kdenopts(lcolor
+> (white)) ytitle(Density) ytitle(, size(small) color("169 132 75")) yscale(lcolor(black)) yla
+> bel(, labels labsize(small) labcolor("173 139 67") angle(horizontal) labgap(tiny) ticks tlco
+> lor("173 139 67") tlength(vsmall) tposition(inside) grid glcolor(black)) ymtick(, labsize(me
+> dsmall) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") grid glcolor("1
+> 73 139 67")) xtitle(GGFCE (% of GDP)) xtitle(, size(small) color("173 139 67") margin(medium
+> )) xlabel(, labels labsize(small) labcolor("173 139 67") angle(horizontal) ticks tlcolor("17
+> 3 139 67") tposition(inside) grid glcolor("0 0 0")) title("Histogram of GGFCE (% of GDP)", s
+> ize(large) color(white) margin(medsmall) box fcolor(black) lcolor(white) bmargin(small)) leg
+> end(off) graphregion(margin(zero) fcolor(black) lcolor(black) ifcolor(black) ilcolor(black))
+>  plotregion(fcolor(black) lcolor("173 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=4.9973014, width=1.2627671)
+
+. histogram ggfce, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) normal normopts(lcolor(w
+> hite) lpattern(vshortdash)) kdensity kdenopts(lcolor(white)) ytitle(Density) ytitle(, size(s
+> mall) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) labcolor("17
+> 3 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsmall) tposit
+> ion(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67") angle(hor
+> izontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(GGFCE (% of GDP)) xt
+> itle(, size(small) color("173 139 67") margin(medium)) xlabel(, labels labsize(small) labcol
+> or("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tposition(inside) grid glcolo
+> r("0 0 0")) title("Histogram of GGFCE (% of GDP)", size(large) color(white) margin(medsmall)
+>  box fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregion(margin(zero) fcolor
+> (black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor("173 13
+> 9 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=4.9973014, width=1.2627671)
+
+. 
+. histogram pollution, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) ytitle(Density) ytit
+> le(, size(small) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) l
+> abcolor("173 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsm
+> all) tposition(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67"
+> ) angle(horizontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(Pollution
+>  (micrograms per cubic meter)) xtitle(, size(small) color("173 139 67") margin(medium)) xlab
+> el(, labels labsize(small) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 6
+> 7") tposition(inside) grid glcolor("0 0 0")) title("Histogram of Pollution (micrograms per c
+> ubic meter)", size(large) color(white) margin(medsmall) box fcolor(black) lcolor(white) bmar
+> gin(small)) legend(off) graphregion(margin(zero) fcolor(black) lcolor(black) ifcolor(black) 
+> ilcolor(black)) plotregion(fcolor(black) lcolor("173 139 67") ifcolor(black) ilcolor("173 13
+> 9 67"))
+(bin=18, start=6.6076542, width=1.5554559)
+
+. histogram pollution, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) kdensity kdenopts(lc
+> olor(white)) ytitle(Density) ytitle(, size(small) color("169 132 75")) yscale(lcolor(black))
+>  ylabel(, labels labsize(small) labcolor("173 139 67") angle(horizontal) labgap(tiny) ticks 
+> tlcolor("173 139 67") tlength(vsmall) tposition(inside) grid glcolor(black)) ymtick(, labsiz
+> e(medsmall) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") grid glcolo
+> r("173 139 67")) xtitle(Pollution (micrograms per cubic meter)) xtitle(, size(small) color("
+> 173 139 67") margin(medium)) xlabel(, labels labsize(small) labcolor("173 139 67") angle(hor
+> izontal) ticks tlcolor("173 139 67") tposition(inside) grid glcolor("0 0 0")) title("Histogr
+> am of Pollution (micrograms per cubic meter)", size(large) color(white) margin(medsmall) box
+>  fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregion(margin(zero) fcolor(bla
+> ck) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor("173 139 67
+> ") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=6.6076542, width=1.5554559)
+
+. histogram pollution, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) normal normopts(lcol
+> or(white) lpattern(vshortdash)) kdensity kdenopts(lcolor(white)) ytitle(Density) ytitle(, si
+> ze(small) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) labcolor
+> ("173 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsmall) tp
+> osition(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67") angle
+> (horizontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(Pollution (micro
+> grams per cubic meter)) xtitle(, size(small) color("173 139 67") margin(medium)) xlabel(, la
+> bels labsize(small) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tpo
+> sition(inside) grid glcolor("0 0 0")) title("Histogram of Pollution (micrograms per cubic me
+> ter)", size(large) color(white) margin(medsmall) box fcolor(black) lcolor(white) bmargin(sma
+> ll)) legend(off) graphregion(margin(zero) fcolor(black) lcolor(black) ifcolor(black) ilcolor
+> (black)) plotregion(fcolor(black) lcolor("173 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=6.6076542, width=1.5554559)
+
+. 
+. histogram dTrade, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) ytitle(Density) ytitle(
+> , size(small) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) labc
+> olor("173 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsmall
+> ) tposition(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67") a
+> ngle(horizontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(dTrade (Expo
+> rt-Imports)(%)) xtitle(, size(small) color("173 139 67") margin(medium)) xlabel(, labels lab
+> size(small) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tposition(i
+> nside) grid glcolor("0 0 0")) title("Histogram of dTrade", size(large) color(white) margin(m
+> edsmall) box fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregion(margin(zero
+> ) fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor
+> ("173 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=-40.926838, width=4.0109529)
+
+. histogram dTrade, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) kdensity kdenopts(lcolo
+> r(white)) ytitle(Density) ytitle(, size(small) color("169 132 75")) yscale(lcolor(black)) yl
+> abel(, labels labsize(small) labcolor("173 139 67") angle(horizontal) labgap(tiny) ticks tlc
+> olor("173 139 67") tlength(vsmall) tposition(inside) grid glcolor(black)) ymtick(, labsize(m
+> edsmall) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") grid glcolor("
+> 173 139 67")) xtitle(dTrade (Export-Imports)(%)) xtitle(, size(small) color("173 139 67") ma
+> rgin(medium)) xlabel(, labels labsize(small) labcolor("173 139 67") angle(horizontal) ticks 
+> tlcolor("173 139 67") tposition(inside) grid glcolor("0 0 0")) title("Histogram of dTrade", 
+> size(large) color(white) margin(medsmall) box fcolor(black) lcolor(white) bmargin(small)) le
+> gend(off) graphregion(margin(zero) fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)
+> ) plotregion(fcolor(black) lcolor("173 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=-40.926838, width=4.0109529)
+
+. histogram dTrade, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) normal normopts(lcolor(
+> white) lpattern(vshortdash)) kdensity kdenopts(lcolor(white)) ytitle(Density) ytitle(, size(
+> small) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) labcolor("1
+> 73 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsmall) tposi
+> tion(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67") angle(ho
+> rizontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(dTrade (Export-Impo
+> rts)(%)) xtitle(, size(small) color("173 139 67") margin(medium)) xlabel(, labels labsize(sm
+> all) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tposition(inside) 
+> grid glcolor("0 0 0")) title("Histogram of dTrade", size(large) color(white) margin(medsmall
+> ) box fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregion(margin(zero) fcolo
+> r(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor("173 1
+> 39 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=-40.926838, width=4.0109529)
+
+. 
+.                   
+.                   //  BOXPLOTS  //
+.                   
+. graph box GDPgr, box(1, fcolor("172 128 68") fintensity(inten100) lcolor(black)) medtype(cli
+> ne) medline(lcolor(white) lpattern(dash_3dot)) cwhisker lines(lcolor("255 255 255") lpattern
+> (longdash_dot_dot)) marker(1, mcolor("172 128 68") msize(medium) msymbol(circle_hollow)) yti
+> tle(GDP Growth (annual %)) ytitle(, size(small) color("172 128 68")) ylabel(#4, labels labsi
+> ze(small) labcolor("172 128 68") angle(horizontal) valuelabel ticks tlcolor("172 128 68") tp
+> osition(inside) grid glcolor("172 128 68") gmin gmax gextend) title("Boxplot of GDP Growth",
+>  size(large) color(white) margin(medium) box fcolor(black) lcolor(white)) graphregion(fcolor
+> (black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) 
+> ifcolor(black) ilcolor(black))    
+
+. graph box GFCF, box(1, fcolor("172 128 68") fintensity(inten100) lcolor(black)) medtype(clin
+> e) medline(lcolor(white) lpattern(dash_3dot)) cwhisker lines(lcolor("255 255 255") lpattern(
+> longdash_dot_dot)) marker(1, mcolor("172 128 68") msize(medium) msymbol(circle_hollow)) ytit
+> le(GFCF (% of GDP)) ytitle(, size(small) color("172 128 68")) ylabel(#4, labels labsize(smal
+> l) labcolor("172 128 68") angle(horizontal) valuelabel ticks tlcolor("172 128 68") tposition
+> (inside) grid glcolor("172 128 68") gmin gmax gextend) title("Boxplot of GFCF", size(large) 
+> color(white) margin(medium) box fcolor(black) lcolor(white)) graphregion(fcolor(black) lcolo
+> r(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black
+> ) ilcolor(black))
+
+. graph box debt, box(1, fcolor("172 128 68") fintensity(inten100) lcolor(black)) medtype(clin
+> e) medline(lcolor(white) lpattern(dash_3dot)) cwhisker lines(lcolor("255 255 255") lpattern(
+> longdash_dot_dot)) marker(1, mcolor("172 128 68") msize(medium) msymbol(circle_hollow)) ytit
+> le(Debt (% of GDP)) ytitle(, size(small) color("172 128 68")) ylabel(#4, labels labsize(smal
+> l) labcolor("172 128 68") angle(horizontal) valuelabel ticks tlcolor("172 128 68") tposition
+> (inside) grid glcolor("172 128 68") gmin gmax gextend) title("Boxplot of Debt", size(large) 
+> color(white) margin(medium) box fcolor(black) lcolor(white)) graphregion(fcolor(black) lcolo
+> r(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black
+> ) ilcolor(black))
+
+. graph box gr_lf, box(1, fcolor("172 128 68") fintensity(inten100) lcolor(black)) medtype(cli
+> ne) medline(lcolor(white) lpattern(dash_3dot)) cwhisker lines(lcolor("255 255 255") lpattern
+> (longdash_dot_dot)) marker(1, mcolor("172 128 68") msize(medium) msymbol(circle_hollow)) yti
+> tle(Gr_labor (% annual)) ytitle(, size(small) color("172 128 68")) ylabel(#4, labels labsize
+> (small) labcolor("172 128 68") angle(horizontal) valuelabel ticks tlcolor("172 128 68") tpos
+> ition(inside) grid glcolor("172 128 68") gmin gmax gextend) title("Boxplot of Labor Growth "
+> , size(large) color(white) margin(medium) box fcolor(black) lcolor(white)) graphregion(fcolo
+> r(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black)
+>  ifcolor(black) ilcolor(black))
+
+. graph box dTrade, box(1, fcolor("172 128 68") fintensity(inten100) lcolor(black)) medtype(cl
+> ine) medline(lcolor(white) lpattern(dash_3dot)) cwhisker lines(lcolor("255 255 255") lpatter
+> n(longdash_dot_dot)) marker(1, mcolor("172 128 68") msize(medium) msymbol(circle_hollow)) yt
+> itle(dTrade (Exp.-Imp. % of GDP)) ytitle(, size(small) color("172 128 68")) ylabel(#4, label
+> s labsize(small) labcolor("172 128 68") angle(horizontal) valuelabel ticks tlcolor("172 128 
+> 68") tposition(inside) grid glcolor("172 128 68") gmin gmax gextend) title("Boxplot of dTrad
+> e", size(large) color(white) margin(small) box fcolor(black) lcolor(white) bmargin(medium)) 
+> graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(bla
+> ck) lcolor(black) ifcolor(black) ilcolor(black))
+
+. graph box ggfce, box(1, fcolor("172 128 68") fintensity(inten100) lcolor(black)) medtype(cli
+> ne) medline(lcolor(white) lpattern(dash_3dot)) cwhisker lines(lcolor("255 255 255") lpattern
+> (longdash_dot_dot)) marker(1, mcolor("172 128 68") msize(medium) msymbol(circle_hollow)) yti
+> tle(General Gov. Final Consumption Expend. (% of GDP)) ytitle(, size(small) color("172 128 6
+> 8")) ylabel(#4, labels labsize(small) labcolor("172 128 68") angle(horizontal) valuelabel ti
+> cks tlcolor("172 128 68") tposition(inside) grid glcolor("172 128 68") gmin gmax gextend) ti
+> tle("Boxplot of GGFCE", size(large) color(white) margin(small) box fcolor(black) lcolor(whit
+> e) bmargin(medium)) graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) p
+> lotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black))
+
+. graph box inflation, box(1, fcolor("172 128 68") fintensity(inten100) lcolor(black)) medtype
+> (cline) medline(lcolor(white) lpattern(dash_3dot)) cwhisker lines(lcolor("255 255 255") lpat
+> tern(longdash_dot_dot)) marker(1, mcolor("172 128 68") msize(medium) msymbol(circle_hollow))
+>  ytitle(Inflation (GDP deflator,annual%)) ytitle(, size(small) color("172 128 68")) ylabel(#
+> 4, labels labsize(small) labcolor("172 128 68") angle(horizontal) valuelabel ticks tlcolor("
+> 172 128 68") tposition(inside) grid glcolor("172 128 68") gmin gmax gextend) by(, title("Box
+> plot of Inflation", size(large) color(white) margin(small) box fcolor(black) lcolor(white) b
+> margin(medium))) by(, graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black))
+>  plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black))) by(country, total yr
+> escale xrescale iyaxes ixaxes iytick ixtick iylabel ixlabel noiytitle ixtitle) subtitle(, si
+> ze(small) color(white) box fcolor(black) lcolor(white)) graphregion(fcolor(black) lcolor(bla
+> ck) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilc
+> olor(black))
+
+. graph box pollution, box(1, fcolor("172 128 68") fintensity(inten100) lcolor(black)) medtype
+> (cline) medline(lcolor(white) lpattern(dash_3dot)) cwhisker lines(lcolor("255 255 255") lpat
+> tern(longdash_dot_dot)) marker(1, mcolor("172 128 68") msize(medium) msymbol(circle_hollow))
+>  ytitle(PM2.5 air pollution) ytitle(, size(small) color("172 128 68")) ylabel(#4, labels lab
+> size(small) labcolor("172 128 68") angle(horizontal) valuelabel ticks tlcolor("172 128 68") 
+> tposition(inside) grid glcolor("172 128 68") gmin gmax gextend) title("Boxplot of Pollution"
+> , size(large) color(white) margin(small) box fcolor(black) lcolor(white) bmargin(medium)) gr
+> aphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black
+> ) lcolor(black) ifcolor(black) ilcolor(black))
+
+. graph box tax, box(1, fcolor("172 128 68") fintensity(inten100) lcolor(black)) medtype(cline
+> ) medline(lcolor(white) lpattern(dash_3dot)) cwhisker lines(lcolor("255 255 255") lpattern(l
+> ongdash_dot_dot)) marker(1, mcolor("172 128 68") msize(medium) msymbol(circle_hollow)) ytitl
+> e(Tax Revenue (% of GDP)) ytitle(, size(small) color("172 128 68")) ylabel(#4, labels labsiz
+> e(small) labcolor("172 128 68") angle(horizontal) valuelabel ticks tlcolor("172 128 68") tpo
+> sition(inside) grid glcolor("172 128 68") gmin gmax gextend) title("Boxplot of Taxes", size(
+> large) color(white) margin(small) box fcolor(black) lcolor(white) bmargin(medium)) graphregi
+> on(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolo
+> r(black) ifcolor(black) ilcolor(black))    
+
+.                   
+.                   //  LINEGRAPHS  //
+. 
+. xtline GDPgr, recast(connected) mcolor(white) msize(tiny) msymbol(diamond) mlcolor(red) lcol
+> or(white) lwidth(medium) lpattern(solid) ytitle(GDP Growth (% annual)) ytitle(, size(medium)
+>  color("172 128 68")) ylabel(, labels labsize(small) labcolor("172 128 68") angle(horizontal
+> ) ticks tlcolor("172 128 68") grid glcolor("172 128 68") gmin gmax gextend) ttitle(Year) tti
+> tle(, size(medium) color("172 128 68")) tlabel(, labels labcolor("172 128 68") angle(horizon
+> tal) ticks tlcolor("172 128 68") grid glcolor("172 128 68") gmin gmax gextend) byopts(title(
+> "LineGraph of GDP Growth by Country", size(medium) color(white) box fcolor(black) lcolor(whi
+> te) bmargin(small))) subtitle(, color("172 128 68") margin(small) box fcolor(white) lcolor(b
+> lack)) byopts(graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotreg
+> ion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black))) graphregion(fcolor(black) lc
+> olor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(bl
+> ack) ilcolor(black)) byopts(yrescale xrescale iyaxes ixaxes iytick ixtick iylabel ixlabel no
+> iytitle noixtitle subtitle(, size(small) color("172 128 68") box fcolor(white) lcolor(black)
+>  bmargin(small)) graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plot
+> region(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)))
+
+. xtline GFCF, recast(connected) mcolor(white) msize(tiny) msymbol(diamond) mlcolor(red) lcolo
+> r(white) lwidth(medium) lpattern(solid) ytitle(Gross Fixed Capital Formation (% of GDP)) yti
+> tle(, size(medium) color("172 128 68")) ylabel(, labels labsize(small) labcolor("172 128 68"
+> ) angle(horizontal) ticks tlcolor("172 128 68") grid glcolor("172 128 68") gmin gmax gextend
+> ) ttitle(Year) ttitle(, size(medium) color("172 128 68")) tlabel(, labels labcolor("172 128 
+> 68") angle(horizontal) ticks tlcolor("172 128 68") grid glcolor("172 128 68") gmin gmax gext
+> end) byopts(title("LineGraph of GFCF by Country", size(medium) color(white) nobox)) subtitle
+> (, color("172 128 68") margin(small) box fcolor(white) lcolor(black)) byopts(graphregion(fco
+> lor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(blac
+> k) ifcolor(black) ilcolor(black))) graphregion(fcolor(black) lcolor(black) ifcolor(black) il
+> color(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) byopts(y
+> rescale xrescale iyaxes ixaxes iytick ixtick iylabel ixlabel noiytitle noixtitle subtitle(, 
+> size(small) color("172 128 68") box fcolor(white) lcolor(black) bmargin(small)) graphregion(
+> fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(b
+> lack) ifcolor(black) ilcolor(black)))
+
+. xtline debt, recast(connected) mcolor(white) msize(tiny) msymbol(diamond) mlcolor(red) lcolo
+> r(white) lwidth(medium) lpattern(solid) ytitle(Debt (% of GDP)) ytitle(, size(medium) color(
+> "172 128 68")) ylabel(, labels labsize(small) labcolor("172 128 68") angle(horizontal) ticks
+>  tlcolor("172 128 68") grid glcolor("172 128 68") gmin gmax gextend) ttitle(Year) ttitle(, s
+> ize(medium) color("172 128 68")) tlabel(, labels labcolor("172 128 68") angle(horizontal) ti
+> cks tlcolor("172 128 68") grid glcolor("172 128 68") gmin gmax gextend) byopts(title("LineGr
+> aph of Debt by Country", size(medium) color(white) box fcolor(black) lcolor(white) bmargin(s
+> mall))) subtitle(, color("172 128 68") margin(small) box fcolor(white) lcolor(black)) byopts
+> (graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(bl
+> ack) lcolor(black) ifcolor(black) ilcolor(black))) graphregion(fcolor(black) lcolor(black) i
+> fcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(
+> black)) byopts(yrescale xrescale iyaxes ixaxes iytick ixtick iylabel ixlabel noiytitle noixt
+> itle subtitle(, size(small) color("172 128 68") box fcolor(white) lcolor(black) bmargin(smal
+> l)) graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor
+> (black) lcolor(black) ifcolor(black) ilcolor(black)))
+
+. xtline gr_lf, recast(connected) mcolor(white) msize(tiny) msymbol(diamond) mlcolor(red) lcol
+> or(white) lwidth(medium) lpattern(solid) ytitle(Labor Growth (% annual)) ytitle(, size(mediu
+> m) color("172 128 68")) ylabel(, labels labsize(small) labcolor("172 128 68") angle(horizont
+> al) ticks tlcolor("172 128 68") grid glcolor("172 128 68") gmin gmax gextend) ttitle(Year) t
+> title(, size(medium) color("172 128 68")) tlabel(, labels labcolor("172 128 68") angle(horiz
+> ontal) ticks tlcolor("172 128 68") grid glcolor("172 128 68") gmin gmax gextend) byopts(titl
+> e("LineGraph of Labor Growth", size(medium) color(white) box fcolor(black) lcolor(white) bma
+> rgin(small))) subtitle(, color("172 128 68") margin(small) box fcolor(white) lcolor(black)) 
+> byopts(graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fco
+> lor(black) lcolor(black) ifcolor(black) ilcolor(black))) graphregion(fcolor(black) lcolor(bl
+> ack) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black) il
+> color(black)) byopts(yrescale xrescale iyaxes ixaxes iytick ixtick iylabel ixlabel noiytitle
+>  noixtitle subtitle(, size(small) color("172 128 68") box fcolor(white) lcolor(black) bmargi
+> n(small)) graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(
+> fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)))
+
+. xtline inflation, recast(connected) mcolor(white) msize(tiny) msymbol(diamond) mlcolor(red) 
+> lcolor(white) lwidth(medium) lpattern(solid) ytitle(Inflation GDP denflator (%)) ytitle(, si
+> ze(medium) color("172 128 68")) ylabel(, labels labsize(small) labcolor("172 128 68") angle(
+> horizontal) ticks tlcolor("172 128 68") grid glcolor("172 128 68") gmin gmax gextend) ttitle
+> (Year) ttitle(, size(medium) color("172 128 68")) tlabel(, labels labcolor("172 128 68") ang
+> le(horizontal) ticks tlcolor("172 128 68") grid glcolor("172 128 68") gmin gmax gextend) byo
+> pts(title("LineGraph of Inflation by Country", size(medium) color(white) box fcolor(black) l
+> color(white) bmargin(small))) subtitle(, color("172 128 68") margin(small) box fcolor(white)
+>  lcolor(black)) byopts(graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)
+> ) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black))) graphregion(fcolor(
+> black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) i
+> fcolor(black) ilcolor(black)) byopts(yrescale xrescale iyaxes ixaxes iytick ixtick iylabel i
+> xlabel noiytitle noixtitle subtitle(, size(small) color("172 128 68") box fcolor(white) lcol
+> or(black) bmargin(small)) graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(bla
+> ck)) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)))
+
+. xtline tax, recast(connected) mcolor(white) msize(tiny) msymbol(diamond) mlcolor(red) lcolor
+> (white) lwidth(medium) lpattern(solid) ytitle(Tax Revenue (% of GDP)) ytitle(, size(medium) 
+> color("172 128 68")) ylabel(, labels labsize(small) labcolor("172 128 68") angle(horizontal)
+>  ticks tlcolor("172 128 68") grid glcolor("172 128 68") gmin gmax gextend) ttitle(Year) ttit
+> le(, size(medium) color("172 128 68")) tlabel(, labels labcolor("172 128 68") angle(horizont
+> al) ticks tlcolor("172 128 68") grid glcolor("172 128 68") gmin gmax gextend) byopts(title("
+> LineGraph of Taxes by Country", size(medium) color(white) box fcolor(black) lcolor(white) bm
+> argin(small))) subtitle(, color("172 128 68") margin(small) box fcolor(white) lcolor(black))
+>  byopts(graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fc
+> olor(black) lcolor(black) ifcolor(black) ilcolor(black))) graphregion(fcolor(black) lcolor(b
+> lack) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black) i
+> lcolor(black)) byopts(yrescale xrescale iyaxes ixaxes iytick ixtick iylabel ixlabel noiytitl
+> e noixtitle subtitle(, size(small) color("172 128 68") box fcolor(white) lcolor(black) bmarg
+> in(small)) graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion
+> (fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)))
+
+. xtline ggfce, recast(connected) mcolor(white) msize(tiny) msymbol(diamond) mlcolor(red) lcol
+> or(white) lwidth(medium) lpattern(solid) ytitle(General Gov Final Consumption Expend. (% of 
+> GDP)) ytitle(, size(medium) color("172 128 68")) ylabel(, labels labsize(small) labcolor("17
+> 2 128 68") angle(horizontal) ticks tlcolor("172 128 68") grid glcolor("172 128 68") gmin gma
+> x gextend) ttitle(Year) ttitle(, size(medium) color("172 128 68")) tlabel(, labels labcolor(
+> "172 128 68") angle(horizontal) ticks tlcolor("172 128 68") grid glcolor("172 128 68") gmin 
+> gmax gextend) byopts(title("LineGraph of GGFCE by Country", size(medium) color(white) nobox)
+> ) subtitle(, color("172 128 68") margin(small) box fcolor(white) lcolor(black)) byopts(graph
+> region(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) l
+> color(black) ifcolor(black) ilcolor(black))) graphregion(fcolor(black) lcolor(black) ifcolor
+> (black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)
+> ) byopts(yrescale xrescale iyaxes ixaxes iytick ixtick iylabel ixlabel noiytitle noixtitle s
+> ubtitle(, size(small) color("172 128 68") box fcolor(white) lcolor(black) bmargin(small)) gr
+> aphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black
+> ) lcolor(black) ifcolor(black) ilcolor(black)))
+
+. xtline pollution, recast(connected) mcolor(white) msize(tiny) msymbol(diamond) mlcolor(red) 
+> lcolor(white) lwidth(medium) lpattern(solid) ytitle(Pollution. PM2.5 air pollution ( mean an
+> nual exposure. micrograms per cubic meter)) ytitle(, size(vsmall) color("172 128 68")) ylabe
+> l(, labels labsize(small) labcolor("172 128 68") angle(horizontal) ticks tlcolor("172 128 68
+> ") grid glcolor("172 128 68") gmin gmax gextend) ttitle(Year) ttitle(, size(medium) color("1
+> 72 128 68")) tlabel(, labels labcolor("172 128 68") angle(horizontal) ticks tlcolor("172 128
+>  68") grid glcolor("172 128 68") gmin gmax gextend) byopts(title("LineGraph of Pollution by 
+> Country", size(medium) color(white) box fcolor(black) lcolor(white) bmargin(small))) subtitl
+> e(, color("172 128 68") margin(small) box fcolor(white) lcolor(black)) byopts(graphregion(fc
+> olor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(bla
+> ck) ifcolor(black) ilcolor(black))) graphregion(fcolor(black) lcolor(black) ifcolor(black) i
+> lcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) byopts(
+> yrescale xrescale iyaxes ixaxes iytick ixtick iylabel ixlabel noiytitle noixtitle subtitle(,
+>  size(small) color("172 128 68") box fcolor(white) lcolor(black) bmargin(small)) graphregion
+> (fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(
+> black) ifcolor(black) ilcolor(black)))
+
+. xtline dTrade, recast(connected) mcolor(white) msize(tiny) msymbol(diamond) mlcolor(red) lco
+> lor(white) lwidth(medium) lpattern(solid) ytitle(dTrade (Exp - Imp.) (% of GDP)) ytitle(, si
+> ze(medium) color("172 128 68")) ylabel(, labels labsize(small) labcolor("172 128 68") angle(
+> horizontal) ticks tlcolor("172 128 68") grid glcolor("172 128 68") gmin gmax gextend) ttitle
+> (Year) ttitle(, size(medium) color("172 128 68")) tlabel(, labels labcolor("172 128 68") ang
+> le(horizontal) ticks tlcolor("172 128 68") grid glcolor("172 128 68") gmin gmax gextend) byo
+> pts(title("LineGraph of dTrade by Country", size(medium) color(white) box fcolor(black) lcol
+> or(white) bmargin(small))) subtitle(, color("172 128 68") margin(small) box fcolor(white) lc
+> olor(black)) byopts(graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) p
+> lotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black))) graphregion(fcolor(bla
+> ck) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifco
+> lor(black) ilcolor(black)) byopts(yrescale xrescale iyaxes ixaxes iytick ixtick iylabel ixla
+> bel noiytitle noixtitle subtitle(, size(small) color("172 128 68") box fcolor(white) lcolor(
+> black) bmargin(small)) graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)
+> ) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)))
+
+.                 
+.                 //  SCATTERPLOT MATRIX  //
+.                 
+. graph matrix GDPgr  debt gr_lf GFCF inflation ggfce pollution dTrade tax, half diagonal(, co
+> lor("172 128 68") fcolor(white) lcolor("172 128 68")) mcolor("172 128 68") msize(medsmall) m
+> symbol(point) title("", size(medium) color(white) box fcolor(black) lcolor(white)) graphregi
+> on(fcolor(black) lcolor(black) ifcolor(black) ilcolor("172 128 68")) plotregion(fcolor(black
+> ) lcolor(black) ifcolor(black) ilcolor(white))
+
+. 
+. *** DESCRIPTIVE STATISTICS: ***
+. 
+. xtdescribe
+
+ country:  1, 2, ..., 13                                     n =         13
+    year:  1993, 1994, ..., 2018                             T =         26
+           Delta(year) = 1 unit
+           Span(year)  = 26 periods
+           (country*year uniquely identifies each observation)
+
+Distribution of T_i:   min      5%     25%       50%       75%     95%     max
+                        26      26      26        26        26      26      26
+
+     Freq.  Percent    Cum. |  Pattern
+ ---------------------------+----------------------------
+       13    100.00  100.00 |  11111111111111111111111111
+ ---------------------------+----------------------------
+       13    100.00         |  XXXXXXXXXXXXXXXXXXXXXXXXXX
+
+. xtsum GDPgr GFCF debt gr_lf inflation tax ggfce pollution dTrade
+
+Variable         |      Mean   Std. Dev.       Min        Max |    Observations
+-----------------+--------------------------------------------+----------------
+GDPgr    overall |  2.642883   3.305757      -11.7   14.52565 |     N =     338
+         between |             1.473824   .8819137   5.743994 |     n =      13
+         within  |             2.986137   -12.3488   11.42454 |     T =      26
+                 |                                            |
+GFCF     overall |  23.84207   5.008261   11.07356   38.43321 |     N =     338
+         between |             3.616798   15.85456   28.97361 |     n =      13
+         within  |             3.601648   15.47431   38.24079 |     T =      26
+                 |                                            |
+debt     overall |  66.81406    45.8228   5.187817    201.147 |     N =     338
+         between |             41.76139   17.17344   132.5165 |     n =      13
+         within  |             22.02484  -22.80365   135.4445 |     T =      26
+                 |                                            |
+gr_lf    overall |  1.506864   1.753168  -4.406671   11.26084 |     N =     325
+         between |             1.191114   .1313014   3.893583 |     n =      13
+         within  |             1.326627   -5.93257   9.734943 |     T =      25
+                 |                                            |
+inflat~n overall |  18.14186    126.862   -4.08393   1945.749 |     N =     338
+         between |             50.83815  -.4909686   186.9602 |     n =      13
+         within  |             117.0521  -160.4764    1776.93 |     T =      26
+                 |                                            |
+tax      overall |  16.89278   5.681094   6.765227   37.75291 |     N =     338
+         between |             5.439459   9.287857   23.89776 |     n =      13
+         within  |             2.209536   11.80818   30.74793 |     T =      26
+                 |                                            |
+ggfce    overall |  16.30116   4.837511   4.997301   27.72711 |     N =     338
+         between |             4.661728   8.510646   23.10282 |     n =      13
+         within  |             1.811615    11.5429   22.45244 |     T =      26
+                 |                                            |
+pollut~n overall |  18.00516   7.243075   6.607654   34.60586 |     N =     338
+         between |             7.412917    7.69959   33.48857 |     n =      13
+         within  |             1.259886   12.24162   20.68329 |     T =      26
+                 |                                            |
+dTrade   overall | -2.775581   11.77084  -40.92684   31.27032 |     N =     338
+         between |             11.26347  -25.20012   22.31601 |     n =      13
+         within  |             4.593304  -20.35896    16.9194 |     T =      26
+
+. 
+. sum GDPgr,detail
+
+                    GDP growth (annual %)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -7.600002          -11.7
+ 5%    -2.959441          -10.4
+10%    -.8143735      -9.132494       Obs                 338
+25%     1.076045      -7.600002       Sum of Wgt.         338
+
+50%     2.787108                      Mean           2.642883
+                        Largest       Std. Dev.      3.305757
+75%     4.133851       11.40001
+90%     6.262268       11.44974       Variance       10.92803
+95%     8.399991       11.46288       Skewness      -.4477643
+99%     11.40001       14.52565       Kurtosis       5.863831
+
+. sum GFCF,detail
+
+          Gross fixed capital formation (% of GDP)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%     11.99882       11.07356
+ 5%     14.51474       11.54415
+10%     17.56304       11.55959       Obs                 338
+25%     21.02188       11.99882       Sum of Wgt.         338
+
+50%      24.1179                      Mean           23.84207
+                        Largest       Std. Dev.      5.008261
+75%     26.32697       37.87231
+90%      29.5531       37.87639       Variance       25.08268
+95%     33.18617       38.01661       Skewness       .0258459
+99%     37.87231       38.43321       Kurtosis       3.680081
+
+. sum debt,detail
+
+          Central government debt, total (% of GDP)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%         6.56       5.187817
+ 5%     11.34522           6.08
+10%     16.91031        6.29357       Obs                 338
+25%     23.59919           6.56       Sum of Wgt.         338
+
+50%     60.66479                      Mean           66.81406
+                        Largest       Std. Dev.       45.8228
+75%     99.44649       196.4169
+90%     124.6592       197.2844       Variance       2099.729
+95%        159.6         198.89       Skewness       .7396185
+99%     196.4169        201.147       Kurtosis       3.027006
+
+. sum gr_lf,detail
+
+                    Growth of labor force
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -1.732986      -4.406671
+ 5%    -.7306962      -2.943308
+10%    -.2779609      -2.467939       Obs                 325
+25%     .3116233      -1.732986       Sum of Wgt.         325
+
+50%     1.365525                      Mean           1.506864
+                        Largest       Std. Dev.      1.753168
+75%     2.528654       8.000044
+90%     3.512214       8.049015       Variance       3.073599
+95%      4.11786       8.192828       Skewness       1.127912
+99%     8.000044       11.26084       Kurtosis       7.197058
+
+. sum dTrade,detail
+
+                    exports-imports (%) 
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -30.57668      -40.92684
+ 5%      -22.585      -37.00518
+10%    -18.24987      -33.52871       Obs                 338
+25%    -8.769028      -30.57668       Sum of Wgt.         338
+
+50%    -2.132186                      Mean          -2.775581
+                        Largest       Std. Dev.      11.77084
+75%     2.072927       27.95385
+90%     10.54293       29.88882       Variance       138.5528
+95%     20.66083       30.71183       Skewness       .1000911
+99%     27.95385       31.27032       Kurtosis        4.03151
+
+. sum ggfce,detail
+
+      General government final consumption expenditure
+                         (% of GDP) 
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%      5.57325       4.997301
+ 5%      8.95386       5.080309
+10%     9.691568       5.509959       Obs                 338
+25%      11.9415        5.57325       Sum of Wgt.         338
+
+50%     17.33778                      Mean           16.30116
+                        Largest       Std. Dev.      4.837511
+75%     20.16576       25.06746
+90%     22.29728        25.1947       Variance       23.40151
+95%     23.67145       25.47385       Skewness      -.1877096
+99%     25.06746       27.72711       Kurtosis       2.082248
+
+. sum inflation,detail
+
+             Inflation, GDP deflator (annual %)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -1.895164       -4.08393
+ 5%    -1.037435      -3.582965
+10%    -.4964871        -2.3523       Obs                 338
+25%     .7983561      -1.895164       Sum of Wgt.         338
+
+50%      3.07681                      Mean           18.14186
+                        Largest       Std. Dev.       126.862
+75%     6.449502       316.7934
+90%     13.76724       661.5041       Variance       16093.97
+95%     26.73279       1058.714       Skewness       12.49806
+99%     316.7934       1945.749       Kurtosis       174.1784
+
+. sum pollution,detail
+
+          PM2.5 air pollution, mean annual exposure
+                (micrograms per cubic meter)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%     6.927969       6.607654
+ 5%     7.954558       6.697928
+10%     9.897928       6.697928       Obs                 338
+25%           12       6.927969       Sum of Wgt.         338
+
+50%     17.46942                      Mean           18.00516
+                        Largest       Std. Dev.      7.243075
+75%     21.06636       34.60586
+90%     31.06173       34.60586       Variance       52.46214
+95%     33.17662       34.60586       Skewness       .6928277
+99%     34.60586       34.60586       Kurtosis       2.800835
+
+. sum tax,detail
+
+                   Tax revenue (% of GDP)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%     7.819827       6.765227
+ 5%     9.061599       7.388248
+10%     9.651741       7.714731       Obs                 338
+25%     11.42357       7.819827       Sum of Wgt.         338
+
+50%     16.24124                      Mean           16.89278
+                        Largest       Std. Dev.      5.681094
+75%     21.97134       26.63959
+90%     24.21541       27.14521       Variance       32.27483
+95%     24.94022       27.22693       Skewness       .1573324
+99%     26.63959       37.75291       Kurtosis       2.031403
+
+. 
+. 
+. 
+.     *** REGRESSION ANALYSIS ***
+.         
+. * PREDICTION: 
+.         
+. reg GDPgr GFCF debt gr_lf dTrade ggfce inflation pollution tax
+
+      Source |       SS           df       MS      Number of obs   =       325
+-------------+----------------------------------   F(8, 316)       =     20.26
+       Model |  1145.56935         8  143.196169   Prob > F        =    0.0000
+    Residual |  2233.95781       316  7.06948674   R-squared       =    0.3390
+-------------+----------------------------------   Adj R-squared   =    0.3222
+       Total |  3379.52716       324  10.4306394   Root MSE        =    2.6589
+
+------------------------------------------------------------------------------
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .1336842   .0313271     4.27   0.000      .072048    .1953203
+        debt |  -.0173565   .0035049    -4.95   0.000    -.0242524   -.0104607
+       gr_lf |   .3464543    .096063     3.61   0.000     .1574505    .5354581
+      dTrade |   .0738873   .0163214     4.53   0.000      .041775    .1059996
+       ggfce |   .0574508   .0428394     1.34   0.181    -.0268358    .1417373
+   inflation |  -.0093996    .001314    -7.15   0.000    -.0119849   -.0068144
+   pollution |   .1474257   .0276957     5.32   0.000     .0929345    .2019169
+         tax |   .1406553   .0348437     4.04   0.000     .0721004    .2092103
+       _cons |   -5.47658    1.25604    -4.36   0.000    -7.947839   -3.005321
+------------------------------------------------------------------------------
+
+. predict GDPgr_hat, xb
+(13 missing values generated)
+
+. predict u_hat, res
+(13 missing values generated)
+
+. sum u_hat, detail
+
+                          Residuals
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -8.574476       -10.5357
+ 5%    -4.987676      -9.093489
+10%    -3.005553      -8.665652       Obs                 325
+25%    -1.233998      -8.574476       Sum of Wgt.         325
+
+50%     .1386292                      Mean           3.44e-09
+                        Largest       Std. Dev.       2.62582
+75%     1.519897       6.268121
+90%     2.763787       7.013912       Variance       6.894932
+95%     3.646413       7.467954       Skewness      -.5916589
+99%     6.268121       9.800623       Kurtosis       5.214914
+
+. pwcorr GDPgr GDPgr_hat, star(0.05) sig
+
+             |    GDPgr GDPgr_~t
+-------------+------------------
+       GDPgr |   1.0000 
+             |
+             |
+   GDPgr_hat |   0.5822*  1.0000 
+             |   0.0000
+             |
+
+. 
+. *** (MIS)SPECIFICATION TEST(S)***
+. 
+. reg GDPgr GFCF debt gr_lf dTrade ggfce inflation pollution tax
+
+      Source |       SS           df       MS      Number of obs   =       325
+-------------+----------------------------------   F(8, 316)       =     20.26
+       Model |  1145.56935         8  143.196169   Prob > F        =    0.0000
+    Residual |  2233.95781       316  7.06948674   R-squared       =    0.3390
+-------------+----------------------------------   Adj R-squared   =    0.3222
+       Total |  3379.52716       324  10.4306394   Root MSE        =    2.6589
+
+------------------------------------------------------------------------------
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .1336842   .0313271     4.27   0.000      .072048    .1953203
+        debt |  -.0173565   .0035049    -4.95   0.000    -.0242524   -.0104607
+       gr_lf |   .3464543    .096063     3.61   0.000     .1574505    .5354581
+      dTrade |   .0738873   .0163214     4.53   0.000      .041775    .1059996
+       ggfce |   .0574508   .0428394     1.34   0.181    -.0268358    .1417373
+   inflation |  -.0093996    .001314    -7.15   0.000    -.0119849   -.0068144
+   pollution |   .1474257   .0276957     5.32   0.000     .0929345    .2019169
+         tax |   .1406553   .0348437     4.04   0.000     .0721004    .2092103
+       _cons |   -5.47658    1.25604    -4.36   0.000    -7.947839   -3.005321
+------------------------------------------------------------------------------
+
+. estat ovtest
+
+Ramsey RESET test using powers of the fitted values of GDPgr
+       Ho:  model has no omitted variables
+                 F(3, 313) =      2.29
+                  Prob > F =      0.0784
+
+. 
+. reg GDPgr GFCF debt gr_lf dTrade ggfce inflation pollution tax
+
+      Source |       SS           df       MS      Number of obs   =       325
+-------------+----------------------------------   F(8, 316)       =     20.26
+       Model |  1145.56935         8  143.196169   Prob > F        =    0.0000
+    Residual |  2233.95781       316  7.06948674   R-squared       =    0.3390
+-------------+----------------------------------   Adj R-squared   =    0.3222
+       Total |  3379.52716       324  10.4306394   Root MSE        =    2.6589
+
+------------------------------------------------------------------------------
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .1336842   .0313271     4.27   0.000      .072048    .1953203
+        debt |  -.0173565   .0035049    -4.95   0.000    -.0242524   -.0104607
+       gr_lf |   .3464543    .096063     3.61   0.000     .1574505    .5354581
+      dTrade |   .0738873   .0163214     4.53   0.000      .041775    .1059996
+       ggfce |   .0574508   .0428394     1.34   0.181    -.0268358    .1417373
+   inflation |  -.0093996    .001314    -7.15   0.000    -.0119849   -.0068144
+   pollution |   .1474257   .0276957     5.32   0.000     .0929345    .2019169
+         tax |   .1406553   .0348437     4.04   0.000     .0721004    .2092103
+       _cons |   -5.47658    1.25604    -4.36   0.000    -7.947839   -3.005321
+------------------------------------------------------------------------------
+
+. estat imtest
+
+Cameron & Trivedi's decomposition of IM-test
+
+---------------------------------------------------
+              Source |       chi2     df      p
+---------------------+-----------------------------
+  Heteroskedasticity |      87.00     44    0.0001
+            Skewness |      14.87      8    0.0617
+            Kurtosis |       9.17      1    0.0025
+---------------------+-----------------------------
+               Total |     111.04     53    0.0000
+---------------------------------------------------
+
+. 
+. 
+.    //GRAPHICAL
+.    
+. histogram u_hat, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) ytitle(Density) ytitle(,
+>  size(small) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) labco
+> lor("173 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsmall)
+>  tposition(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67") an
+> gle(horizontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(U_HAT) xtitle
+> (, size(small) color("173 139 67") margin(medium)) xlabel(, labels labsize(small) labcolor("
+> 173 139 67") angle(horizontal) ticks tlcolor("173 139 67") tposition(inside) grid glcolor("0
+>  0 0")) title("Histogram of U_HAT", size(large) color(white) margin(medsmall) box fcolor(bla
+> ck) lcolor(white) bmargin(small)) legend(off) graphregion(margin(zero) fcolor(black) lcolor(
+> black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor("173 139 67") ifcolor(
+> black) ilcolor("173 139 67"))
+(bin=18, start=-10.535697, width=1.1297956)
+
+. histogram u_hat, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) kdensity kdenopts(lcolor
+> (white)) ytitle(Density) ytitle(, size(small) color("169 132 75")) yscale(lcolor(black)) yla
+> bel(, labels labsize(small) labcolor("173 139 67") angle(horizontal) labgap(tiny) ticks tlco
+> lor("173 139 67") tlength(vsmall) tposition(inside) grid glcolor(black)) ymtick(, labsize(me
+> dsmall) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") grid glcolor("1
+> 73 139 67")) xtitle(U_HAT) xtitle(, size(small) color("173 139 67") margin(medium)) xlabel(,
+>  labels labsize(small) labcolor("173 139 67") angle(horizontal) ticks tlcolor("173 139 67") 
+> tposition(inside) grid glcolor("0 0 0")) title("Histogram of U_HAT", size(large) color(white
+> ) margin(medsmall) box fcolor(black) lcolor(white) bmargin(small)) legend(off) graphregion(m
+> argin(zero) fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(bla
+> ck) lcolor("173 139 67") ifcolor(black) ilcolor("173 139 67"))
+(bin=18, start=-10.535697, width=1.1297956)
+
+. histogram u_hat, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) normal normopts(lcolor(w
+> hite) lpattern(vshortdash)) kdensity kdenopts(lcolor(white)) ytitle(Density) ytitle(, size(s
+> mall) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) labcolor("17
+> 3 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsmall) tposit
+> ion(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67") angle(hor
+> izontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(U_HAT) xtitle(, size
+> (small) color("173 139 67") margin(medium)) xlabel(, labels labsize(small) labcolor("173 139
+>  67") angle(horizontal) ticks tlcolor("173 139 67") tposition(inside) grid glcolor("0 0 0"))
+>  title("Histogram of U_HAT", size(large) color(white) margin(medsmall) box fcolor(black) lco
+> lor(white) bmargin(small)) legend(off) graphregion(margin(zero) fcolor(black) lcolor(black) 
+> ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor("173 139 67") ifcolor(black) 
+> ilcolor("173 139 67"))
+(bin=18, start=-10.535697, width=1.1297956)
+
+. histogram u_hat, fcolor("173 139 67") lcolor(black) lwidth(vvvthin) normal normopts(lcolor(w
+> hite) lpattern(vshortdash)) kdensity kdenopts(lcolor(white)) ytitle(Density) ytitle(, size(s
+> mall) color("169 132 75")) yscale(lcolor(black)) ylabel(, labels labsize(small) labcolor("17
+> 3 139 67") angle(horizontal) labgap(tiny) ticks tlcolor("173 139 67") tlength(vsmall) tposit
+> ion(inside) grid glcolor(black)) ymtick(, labsize(medsmall) labcolor("173 139 67") angle(hor
+> izontal) ticks tlcolor("173 139 67") grid glcolor("173 139 67")) xtitle(U_HAT) xtitle(, size
+> (small) color("173 139 67") margin(medium)) xlabel(, labels labsize(small) labcolor("173 139
+>  67") angle(horizontal) ticks tlcolor("173 139 67") tposition(inside) grid glcolor("0 0 0"))
+>  by(, title("Histogram of U_HAT by Country", size(large) color(white) margin(medsmall) box f
+> color(black) lcolor(white) bmargin(small))) by(, legend(off)) by(, graphregion(margin(zero) 
+> fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor("
+> 173 139 67") ifcolor(black) ilcolor("173 139 67"))) by(country, yrescale xrescale iyaxes ixa
+> xes iytick ixtick iylabel ixlabel iytitle ixtitle) subtitle(, color("173 139 67") orientatio
+> n(horizontal)) graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor("173 139 67"))
+>  plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor("173 139 67"))
+
+. 
+. xtline u_hat, recast(connected) mcolor(white) msize(tiny) msymbol(diamond) mlcolor(red) lcol
+> or(white) lwidth(medium) lpattern(solid) ytitle(Residuals) ytitle(, size(medium) color("172 
+> 128 68")) ylabel(, labels labsize(small) labcolor("172 128 68") angle(horizontal) ticks tlco
+> lor("172 128 68") grid glcolor("172 128 68") gmin gmax gextend) ttitle(Year) ttitle(, size(m
+> edium) color("172 128 68")) tlabel(, labels labcolor("172 128 68") angle(horizontal) ticks t
+> lcolor("172 128 68") grid glcolor("172 128 68") gmin gmax gextend) byopts(title("LineGraph o
+> f U_HAT by Country", size(medium) color(white) box fcolor(black) lcolor(white) bmargin(small
+> ))) subtitle(, color("172 128 68") margin(small) box fcolor(white) lcolor(black)) byopts(gra
+> phregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black)
+>  lcolor(black) ifcolor(black) ilcolor(black))) graphregion(fcolor(black) lcolor(black) ifcol
+> or(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(blac
+> k)) byopts(yrescale xrescale iyaxes ixaxes iytick ixtick iylabel ixlabel noiytitle noixtitle
+>  subtitle(, size(small) color("172 128 68") box fcolor(white) lcolor(black) bmargin(small)) 
+> graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(bla
+> ck) lcolor(black) ifcolor(black) ilcolor(black)))
+
+. 
+. graph matrix GDPgr  debt gr_lf GFCF inflation ggfce pollution dTrade tax u_hat, half diagona
+> l(, color("172 128 68") fcolor(white) lcolor("172 128 68")) mcolor("172 128 68") msize(medsm
+> all) msymbol(point) title("", size(medium) color(white) box fcolor(black) lcolor(white)) gra
+> phregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor("172 128 68")) plotregion(fcolor
+> (black) lcolor(black) ifcolor(black) ilcolor(white))
+
+. 
+. qnorm u_hat, recast(connected) mcolor(white) msize(small) msymbol(circle_hollow) mlabel(coun
+> try) mlabsize(tiny) mlabcolor("175 129 58") mlabposition(2) mlabangle(horizontal) lcolor("17
+> 5 129 58") lwidth(medthin) rlopts(lcolor(red) lwidth(medthin)) ytitle(, size(small) color("1
+> 75 129 58")) ylabel(, labels labsize(small) labcolor("175 129 58") angle(horizontal) ticks t
+> lcolor("175 129 58") tlength(tiny) tlwidth(thin) grid glwidth(thin) glcolor("175 129 58") gm
+> in gmax nogextend) xtitle(, size(small) color("175 129 58")) xlabel(, labels labsize(small) 
+> labcolor("175 129 58") ticks tlcolor("175 129 58") tlength(tiny) tlwidth(thin) grid glwidth(
+> thin) glcolor("175 129 58") gmin gmax nogextend) graphregion(fcolor(black) lcolor(black) ifc
+> olor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(bl
+> ack))
+
+. pnorm u_hat, recast(connected) mcolor(white) msize(small) msymbol(circle_hollow) mlabel(coun
+> try) mlabsize(tiny) mlabcolor("175 129 58") mlabposition(2) mlabangle(horizontal) lcolor("17
+> 5 129 58") lwidth(medthin) rlopts(lcolor(red) lwidth(medthin)) ytitle(, size(small) color("1
+> 75 129 58")) ylabel(, labels labsize(small) labcolor("175 129 58") angle(horizontal) ticks t
+> lcolor("175 129 58") tlength(tiny) tlwidth(thin) grid glwidth(thin) glcolor("175 129 58") gm
+> in gmax nogextend) xtitle(, size(small) color("175 129 58")) xlabel(, labels labsize(small) 
+> labcolor("175 129 58") ticks tlcolor("175 129 58") tlength(tiny) tlwidth(thin) grid glwidth(
+> thin) glcolor("175 129 58") gmin gmax nogextend) graphregion(fcolor(black) lcolor(black) ifc
+> olor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(bl
+> ack))
+
+. 
+.  //Test:
+. swilk u_hat  
+
+                   Shapiro-Wilk W test for normal data
+
+    Variable |        Obs       W           V         z       Prob>z
+-------------+------------------------------------------------------
+       u_hat |        325    0.95622     10.015     5.429    0.00000
+
+. 
+.  
+.            
+. * TEST: HETEROSCEDASTICITY (Ετεροσκεδαστικότητα)
+.            
+. reg GDPgr GFCF debt gr_lf dTrade ggfce inflation pollution tax
+
+      Source |       SS           df       MS      Number of obs   =       325
+-------------+----------------------------------   F(8, 316)       =     20.26
+       Model |  1145.56935         8  143.196169   Prob > F        =    0.0000
+    Residual |  2233.95781       316  7.06948674   R-squared       =    0.3390
+-------------+----------------------------------   Adj R-squared   =    0.3222
+       Total |  3379.52716       324  10.4306394   Root MSE        =    2.6589
+
+------------------------------------------------------------------------------
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .1336842   .0313271     4.27   0.000      .072048    .1953203
+        debt |  -.0173565   .0035049    -4.95   0.000    -.0242524   -.0104607
+       gr_lf |   .3464543    .096063     3.61   0.000     .1574505    .5354581
+      dTrade |   .0738873   .0163214     4.53   0.000      .041775    .1059996
+       ggfce |   .0574508   .0428394     1.34   0.181    -.0268358    .1417373
+   inflation |  -.0093996    .001314    -7.15   0.000    -.0119849   -.0068144
+   pollution |   .1474257   .0276957     5.32   0.000     .0929345    .2019169
+         tax |   .1406553   .0348437     4.04   0.000     .0721004    .2092103
+       _cons |   -5.47658    1.25604    -4.36   0.000    -7.947839   -3.005321
+------------------------------------------------------------------------------
+
+. estat hettest
+
+Breusch-Pagan / Cook-Weisberg test for heteroskedasticity 
+         Ho: Constant variance
+         Variables: fitted values of GDPgr
+
+         chi2(1)      =     0.53
+         Prob > chi2  =   0.4667
+
+. 
+. 
+. //Graphically:
+.                  
+. twoway (scatter GFCF u_hat, mcolor("175 129 58") msize(small) msymbol(circle)), ytitle(GGFCE
+> ) ytitle(, size(small) color("175 129 58")) yscale(noline) ylabel(#1, labels labsize(small) 
+> labcolor("175 129 58") angle(horizontal) noticks grid glcolor("175 129 58") gmin gmax nogext
+> end) xtitle(Residuals) xtitle(, size(medsmall) color("175 129 58")) xlabel(minmax, labels la
+> bsize(small) labcolor("175 129 58") ticks tlcolor("175 129 58") grid glcolor("175 129 58") g
+> min gmax gextend) graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plo
+> tregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black))
+
+. twoway (scatter debt u_hat, mcolor("175 129 58") msize(small) msymbol(circle)), ytitle(Debt)
+>  ytitle(, size(small) color("175 129 58")) yscale(noline) ylabel(#1, labels labsize(small) l
+> abcolor("175 129 58") angle(horizontal) noticks grid glcolor("175 129 58") gmin gmax nogexte
+> nd) xtitle(Residuals) xtitle(, size(medsmall) color("175 129 58")) xlabel(minmax, labels lab
+> size(small) labcolor("175 129 58") ticks tlcolor("175 129 58") grid glcolor("175 129 58") gm
+> in gmax gextend) graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plot
+> region(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black))
+
+. twoway (scatter gr_lf u_hat, mcolor("175 129 58") msize(small) msymbol(circle)), ytitle(Labo
+> r Growth(% annual)) ytitle(, size(small) color("175 129 58")) yscale(noline) ylabel(#1, labe
+> ls labsize(small) labcolor("175 129 58") angle(horizontal) noticks grid glcolor("175 129 58"
+> ) gmin gmax nogextend) xtitle(Residuals) xtitle(, size(medsmall) color("175 129 58")) xlabel
+> (minmax, labels labsize(small) labcolor("175 129 58") ticks tlcolor("175 129 58") grid glcol
+> or("175 129 58") gmin gmax gextend) graphregion(fcolor(black) lcolor(black) ifcolor(black) i
+> lcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black))
+
+. twoway (scatter dTrade u_hat, mcolor("175 129 58") msize(small) msymbol(circle)), ytitle(dTr
+> ade(Exp. - Imp (%))) ytitle(, size(small) color("175 129 58")) yscale(noline) ylabel(#1, lab
+> els labsize(small) labcolor("175 129 58") angle(horizontal) noticks grid glcolor("175 129 58
+> ") gmin gmax nogextend) xtitle(Residuals) xtitle(, size(medsmall) color("175 129 58")) xlabe
+> l(minmax, labels labsize(small) labcolor("175 129 58") ticks tlcolor("175 129 58") grid glco
+> lor("175 129 58") gmin gmax gextend) graphregion(fcolor(black) lcolor(black) ifcolor(black) 
+> ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black))
+
+. twoway (scatter ggfce u_hat, mcolor("175 129 58") msize(small) msymbol(circle)), ytitle(Gene
+> ral Gov. Final Consumption expend.(% of GDP)) ytitle(, size(small) color("175 129 58")) ysca
+> le(noline) ylabel(#1, labels labsize(small) labcolor("175 129 58") angle(horizontal) noticks
+>  grid glcolor("175 129 58") gmin gmax nogextend) xtitle(Residuals) xtitle(, size(medsmall) c
+> olor("175 129 58")) xlabel(minmax, labels labsize(small) labcolor("175 129 58") ticks tlcolo
+> r("175 129 58") grid glcolor("175 129 58") gmin gmax gextend) graphregion(fcolor(black) lcol
+> or(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(blac
+> k) ilcolor(black))
+
+. twoway (scatter pollution u_hat, mcolor("175 129 58") msize(small) msymbol(circle)), ytitle(
+> PM2.5 air pollution. mean annual exposure %) ytitle(, size(small) color("175 129 58")) yscal
+> e(noline) ylabel(#1, labels labsize(small) labcolor("175 129 58") angle(horizontal) noticks 
+> grid glcolor("175 129 58") gmin gmax nogextend) xtitle(Residuals) xtitle(, size(medsmall) co
+> lor("175 129 58")) xlabel(minmax, labels labsize(small) labcolor("175 129 58") ticks tlcolor
+> ("175 129 58") grid glcolor("175 129 58") gmin gmax gextend) graphregion(fcolor(black) lcolo
+> r(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black
+> ) ilcolor(black))
+
+. twoway (scatter tax u_hat, mcolor("175 129 58") msize(small) msymbol(circle)), ytitle(Tax Re
+> venue (% of GDP)) ytitle(, size(small) color("175 129 58")) yscale(noline) ylabel(#1, labels
+>  labsize(small) labcolor("175 129 58") angle(horizontal) noticks grid glcolor("175 129 58") 
+> gmin gmax nogextend) xtitle(Residuals) xtitle(, size(medsmall) color("175 129 58")) xlabel(m
+> inmax, labels labsize(small) labcolor("175 129 58") ticks tlcolor("175 129 58") grid glcolor
+> ("175 129 58") gmin gmax gextend) graphregion(fcolor(black) lcolor(black) ifcolor(black) ilc
+> olor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black))
+
+. twoway (scatter inflation u_hat, mcolor("175 129 58") msize(small) msymbol(circle)), ytitle(
+> Inflation. GDP deflator (annual %)) ytitle(, size(small) color("175 129 58")) yscale(noline)
+>  ylabel(#1, labels labsize(small) labcolor("175 129 58") angle(horizontal) noticks grid glco
+> lor("175 129 58") gmin gmax nogextend) xtitle(Residuals) xtitle(, size(medsmall) color("175 
+> 129 58")) xlabel(minmax, labels labsize(small) labcolor("175 129 58") ticks tlcolor("175 129
+>  58") grid glcolor("175 129 58") gmin gmax gextend) graphregion(fcolor(black) lcolor(black) 
+> ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor
+> (black))
+
+. 
+. * TEST: MULTICOLLINEARITY (Πολυσυγγραμμικότητα) :    
+.          
+. reg GDPgr GFCF debt gr_lf dTrade ggfce inflation pollution tax
+
+      Source |       SS           df       MS      Number of obs   =       325
+-------------+----------------------------------   F(8, 316)       =     20.26
+       Model |  1145.56935         8  143.196169   Prob > F        =    0.0000
+    Residual |  2233.95781       316  7.06948674   R-squared       =    0.3390
+-------------+----------------------------------   Adj R-squared   =    0.3222
+       Total |  3379.52716       324  10.4306394   Root MSE        =    2.6589
+
+------------------------------------------------------------------------------
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .1336842   .0313271     4.27   0.000      .072048    .1953203
+        debt |  -.0173565   .0035049    -4.95   0.000    -.0242524   -.0104607
+       gr_lf |   .3464543    .096063     3.61   0.000     .1574505    .5354581
+      dTrade |   .0738873   .0163214     4.53   0.000      .041775    .1059996
+       ggfce |   .0574508   .0428394     1.34   0.181    -.0268358    .1417373
+   inflation |  -.0093996    .001314    -7.15   0.000    -.0119849   -.0068144
+   pollution |   .1474257   .0276957     5.32   0.000     .0929345    .2019169
+         tax |   .1406553   .0348437     4.04   0.000     .0721004    .2092103
+       _cons |   -5.47658    1.25604    -4.36   0.000    -7.947839   -3.005321
+------------------------------------------------------------------------------
+
+. vif 
+
+    Variable |       VIF       1/VIF  
+-------------+----------------------
+       ggfce |      1.94    0.515484
+   pollution |      1.84    0.542212
+         tax |      1.79    0.557979
+      dTrade |      1.71    0.585450
+       gr_lf |      1.30    0.769279
+        debt |      1.19    0.837582
+        GFCF |      1.11    0.902793
+   inflation |      1.06    0.944586
+-------------+----------------------
+    Mean VIF |      1.49
+
+. corr GFCF debt gr_lf dTrade ggfce inflation pollution tax
+(obs=325)
+
+             |     GFCF     debt    gr_lf   dTrade    ggfce inflat~n pollut~n      tax
+-------------+------------------------------------------------------------------------
+        GFCF |   1.0000
+        debt |  -0.2113   1.0000
+       gr_lf |   0.1074  -0.2115   1.0000
+      dTrade |   0.1162   0.0006  -0.1601   1.0000
+       ggfce |  -0.0964   0.3210  -0.2822  -0.2297   1.0000
+   inflation |   0.1208  -0.0446  -0.0715  -0.0591   0.0744   1.0000
+   pollution |  -0.1024  -0.0840   0.3662  -0.4754  -0.2540   0.0690   1.0000
+         tax |  -0.0121   0.1982  -0.0794  -0.2743   0.6099   0.0918  -0.2225   1.0000
+
+
+. 
+. 
+. 
+. * TEST: AUTOCORRELATION (Αυτοσυσχέτιση) :
+.  
+.  sort country year
+
+.  gen l= L.u_hat
+(26 missing values generated)
+
+.  corr l u_hat 
+(obs=312)
+
+             |        l    u_hat
+-------------+------------------
+           l |   1.0000
+       u_hat |   0.4031   1.0000
+
+
+. 
+. // Grapfically:
+.  twoway (scatter l u_hat, mcolor("175 129 58") msize(small) msymbol(circle)), ytitle(L1 Resi
+> duals) ytitle(, size(small) color("175 129 58")) yscale(noline) ylabel(#1, labels labsize(sm
+> all) labcolor("175 129 58") angle(horizontal) noticks grid glcolor("175 129 58") gmin gmax n
+> ogextend) xtitle(Residuals) xtitle(, size(medsmall) color("175 129 58")) xlabel(minmax, labe
+> ls labsize(small) labcolor("175 129 58") ticks tlcolor("175 129 58") grid glcolor("175 129 5
+> 8") gmin gmax gextend) graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)
+> ) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black))
+
+. 
+. * HETEROGENEITY ( Ετερογένεια ) : 
+. 
+. sort country year
+
+. by country: egen average_GDPgr =mean(GDPgr)
+
+. twoway (scatter GDPgr country, mcolor("186 128 63") msymbol(circle_hollow)) (connected avera
+> ge_GDPgr country, mcolor(red) msize(medsmall) msymbol(diamond) mlabel(average_infl) mlabsize
+> (vsmall) mlabcolor(green) mlabposition(12) mlabangle(horizontal) lcolor(red) lwidth(medthin)
+>  lpattern(dash_3dot)), ytitle(GDPgr (% annual)) ytitle(, size(small) color("186 128 63")) yl
+> abel(, labels labsize(small) labcolor("186 128 63") angle(horizontal) ticks tlcolor("186 128
+>  63") tlength(tiny) tlwidth(thin) grid glwidth(thin) glcolor("186 128 63") gmin gmax nogexte
+> nd) xtitle(Country) xtitle(, size(small) color("186 128 63")) xlabel(0 1 "Aus" 2 "Bah" 3 "Be
+> l" 4 "Gre"  5 "Gua" 6 "Hun" 7 "Ice" 8 "Jam" 9 "Jap" 10 "Jor" 11 "Sin" 12 "Spa" 13 "Swi" 14, 
+> labels labsize(small) labcolor("186 128 63") valuelabel ticks tlcolor("186 128 63") tlength(
+> tiny) tlwidth(thin) grid glwidth(thin) glcolor("186 128 63") gmin gmax nogextend) graphregio
+> n(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor
+> (black) ifcolor(black) ilcolor(black))
+
+.  
+.  
+. * COEFFICIENTS TESTING :
+. 
+. reg GDPgr GFCF debt gr_lf dTrade ggfce inflation pollution tax
+
+      Source |       SS           df       MS      Number of obs   =       325
+-------------+----------------------------------   F(8, 316)       =     20.26
+       Model |  1145.56935         8  143.196169   Prob > F        =    0.0000
+    Residual |  2233.95781       316  7.06948674   R-squared       =    0.3390
+-------------+----------------------------------   Adj R-squared   =    0.3222
+       Total |  3379.52716       324  10.4306394   Root MSE        =    2.6589
+
+------------------------------------------------------------------------------
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .1336842   .0313271     4.27   0.000      .072048    .1953203
+        debt |  -.0173565   .0035049    -4.95   0.000    -.0242524   -.0104607
+       gr_lf |   .3464543    .096063     3.61   0.000     .1574505    .5354581
+      dTrade |   .0738873   .0163214     4.53   0.000      .041775    .1059996
+       ggfce |   .0574508   .0428394     1.34   0.181    -.0268358    .1417373
+   inflation |  -.0093996    .001314    -7.15   0.000    -.0119849   -.0068144
+   pollution |   .1474257   .0276957     5.32   0.000     .0929345    .2019169
+         tax |   .1406553   .0348437     4.04   0.000     .0721004    .2092103
+       _cons |   -5.47658    1.25604    -4.36   0.000    -7.947839   -3.005321
+------------------------------------------------------------------------------
+
+. test GFCF=1
+
+ ( 1)  GFCF = 1
+
+       F(  1,   316) =  764.74
+            Prob > F =    0.0000
+
+. test debt=1
+
+ ( 1)  debt = 1
+
+       F(  1,   316) =84254.90
+            Prob > F =    0.0000
+
+. test gr_lf=1
+
+ ( 1)  gr_lf = 1
+
+       F(  1,   316) =   46.28
+            Prob > F =    0.0000
+
+. test dTrade=1
+
+ ( 1)  dTrade = 1
+
+       F(  1,   316) = 3219.69
+            Prob > F =    0.0000
+
+. test ggfce=1
+
+ ( 1)  ggfce = 1
+
+       F(  1,   316) =  484.08
+            Prob > F =    0.0000
+
+. test inflation=1
+
+ ( 1)  inflation = 1
+
+       F(  1,   316) = 5.9e+05
+            Prob > F =    0.0000
+
+. test pollution=1
+
+ ( 1)  pollution = 1
+
+       F(  1,   316) =  947.63
+            Prob > F =    0.0000
+
+. test tax=1
+
+ ( 1)  tax = 1
+
+       F(  1,   316) =  608.26
+            Prob > F =    0.0000
+
+. 
+. test GFCF debt gr_lf dTrade ggfce inflation pollution tax
+
+ ( 1)  GFCF = 0
+ ( 2)  debt = 0
+ ( 3)  gr_lf = 0
+ ( 4)  dTrade = 0
+ ( 5)  ggfce = 0
+ ( 6)  inflation = 0
+ ( 7)  pollution = 0
+ ( 8)  tax = 0
+
+       F(  8,   316) =   20.26
+            Prob > F =    0.0000
+
+.  // F(  8,   316) =   20.26
+.     //        Prob > F =    0.0000
+. 
+. 
+. 
+.  *** COMPARISON OF ESTIMATES (OLS, FIXED EFFECTS, RANDOM EFFECTS & WLS/GLS VERSIONS OF THEM)
+>  ***
+.  
+.  
+.  reg GDPgr GFCF debt gr_lf inflation tax ggfce pollution dTrade
+
+      Source |       SS           df       MS      Number of obs   =       325
+-------------+----------------------------------   F(8, 316)       =     20.26
+       Model |  1145.56935         8  143.196169   Prob > F        =    0.0000
+    Residual |  2233.95781       316  7.06948674   R-squared       =    0.3390
+-------------+----------------------------------   Adj R-squared   =    0.3222
+       Total |  3379.52716       324  10.4306394   Root MSE        =    2.6589
+
+------------------------------------------------------------------------------
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .1336842   .0313271     4.27   0.000      .072048    .1953203
+        debt |  -.0173565   .0035049    -4.95   0.000    -.0242524   -.0104607
+       gr_lf |   .3464543    .096063     3.61   0.000     .1574505    .5354581
+   inflation |  -.0093996    .001314    -7.15   0.000    -.0119849   -.0068144
+         tax |   .1406553   .0348437     4.04   0.000     .0721004    .2092103
+       ggfce |   .0574508   .0428394     1.34   0.181    -.0268358    .1417373
+   pollution |   .1474257   .0276957     5.32   0.000     .0929345    .2019169
+      dTrade |   .0738873   .0163214     4.53   0.000      .041775    .1059996
+       _cons |   -5.47658    1.25604    -4.36   0.000    -7.947839   -3.005321
+------------------------------------------------------------------------------
+
+.  estimates store ols
+
+.  reg GDPgr GFCF debt gr_lf inflation tax ggfce pollution dTrade ,vce (robust)
+
+Linear regression                               Number of obs     =        325
+                                                F(8, 316)         =      17.88
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.3390
+                                                Root MSE          =     2.6589
+
+------------------------------------------------------------------------------
+             |               Robust
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .1336842   .0344909     3.88   0.000     .0658233     .201545
+        debt |  -.0173565   .0037817    -4.59   0.000    -.0247971    -.009916
+       gr_lf |   .3464543    .102849     3.37   0.001      .144099    .5488097
+   inflation |  -.0093996    .001566    -6.00   0.000    -.0124807   -.0063185
+         tax |   .1406553   .0326841     4.30   0.000     .0763494    .2049612
+       ggfce |   .0574508   .0373655     1.54   0.125    -.0160659    .1309674
+   pollution |   .1474257   .0283888     5.19   0.000     .0915708    .2032807
+      dTrade |   .0738873    .019835     3.73   0.000     .0348619    .1129127
+       _cons |   -5.47658   1.244668    -4.40   0.000    -7.925464   -3.027696
+------------------------------------------------------------------------------
+
+.  estimates store olsRobust
+
+.  xtreg GDPgr GFCF debt gr_lf inflation tax ggfce pollution dTrade , fe
+
+Fixed-effects (within) regression               Number of obs     =        325
+Group variable: country                         Number of groups  =         13
+
+R-sq:                                           Obs per group:
+     within  = 0.3087                                         min =         25
+     between = 0.0406                                         avg =       25.0
+     overall = 0.1430                                         max =         25
+
+                                                F(8,304)          =      16.97
+corr(u_i, Xb)  = -0.6194                        Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .0300907   .0569481     0.53   0.598    -.0819717     .142153
+        debt |   -.030919     .00866    -3.57   0.000    -.0479601   -.0138779
+       gr_lf |   .1454988   .1118795     1.30   0.194    -.0746574    .3656551
+   inflation |  -.0105252   .0013236    -7.95   0.000    -.0131298   -.0079207
+         tax |   .3808796   .0734528     5.19   0.000     .2363394    .5254197
+       ggfce |  -.1040136   .0973563    -1.07   0.286    -.2955912     .087564
+   pollution |   .0103019   .1244575     0.08   0.934    -.2346054    .2552092
+      dTrade |  -.0421644   .0426986    -0.99   0.324    -.1261867    .0418578
+       _cons |  -1.049703   3.282676    -0.32   0.749    -7.509347    5.409941
+-------------+----------------------------------------------------------------
+     sigma_u |  2.3313242
+     sigma_e |  2.4941683
+         rho |  .46629177   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0: F(12, 304) = 4.59                     Prob > F = 0.0000
+
+.  estimates store Fe
+
+.  xtreg GDPgr GFCF debt gr_lf inflation tax ggfce pollution dTrade , fe vce (robust)
+
+Fixed-effects (within) regression               Number of obs     =        325
+Group variable: country                         Number of groups  =         13
+
+R-sq:                                           Obs per group:
+     within  = 0.3087                                         min =         25
+     between = 0.0406                                         avg =       25.0
+     overall = 0.1430                                         max =         25
+
+                                                F(8,12)           =    9272.58
+corr(u_i, Xb)  = -0.6194                        Prob > F          =     0.0000
+
+                               (Std. Err. adjusted for 13 clusters in country)
+------------------------------------------------------------------------------
+             |               Robust
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .0300907   .0961283     0.31   0.760    -.1793548    .2395362
+        debt |   -.030919   .0189382    -1.63   0.128    -.0721818    .0103438
+       gr_lf |   .1454988   .1001673     1.45   0.172    -.0727468    .3637445
+   inflation |  -.0105252   .0007616   -13.82   0.000    -.0121847   -.0088658
+         tax |   .3808796    .099056     3.85   0.002      .165055    .5967041
+       ggfce |  -.1040136   .1806537    -0.58   0.575    -.4976241     .289597
+   pollution |   .0103019   .1721543     0.06   0.953      -.36479    .3853938
+      dTrade |  -.0421644   .0353136    -1.19   0.256    -.1191062    .0347773
+       _cons |  -1.049703   5.209489    -0.20   0.844    -12.40021     10.3008
+-------------+----------------------------------------------------------------
+     sigma_u |  2.3313242
+     sigma_e |  2.4941683
+         rho |  .46629177   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+.  estimates store FeRobust
+
+.  xtreg GDPgr GFCF debt gr_lf inflation tax ggfce pollution dTrade , re
+
+Random-effects GLS regression                   Number of obs     =        325
+Group variable: country                         Number of groups  =         13
+
+R-sq:                                           Obs per group:
+     within  = 0.2507                                         min =         25
+     between = 0.7194                                         avg =       25.0
+     overall = 0.3390                                         max =         25
+
+                                                Wald chi2(8)      =     162.04
+corr(u_i, X)   = 0 (assumed)                    Prob > chi2       =     0.0000
+
+------------------------------------------------------------------------------
+       GDPgr |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .1336842   .0313271     4.27   0.000     .0722841    .1950842
+        debt |  -.0173565   .0035049    -4.95   0.000     -.024226   -.0104871
+       gr_lf |   .3464543    .096063     3.61   0.000     .1581744    .5347343
+   inflation |  -.0093996    .001314    -7.15   0.000     -.011975   -.0068243
+         tax |   .1406553   .0348437     4.04   0.000     .0723629    .2089477
+       ggfce |   .0574508   .0428394     1.34   0.180    -.0265129    .1414145
+   pollution |   .1474257   .0276957     5.32   0.000     .0931432    .2017082
+      dTrade |   .0738873   .0163214     4.53   0.000      .041898    .1058766
+       _cons |   -5.47658    1.25604    -4.36   0.000    -7.938374   -3.014786
+-------------+----------------------------------------------------------------
+     sigma_u |          0
+     sigma_e |  2.4941683
+         rho |          0   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+.  estimates store Re
+
+.  xtreg GDPgr GFCF debt gr_lf inflation tax ggfce pollution dTrade , re vce (robust)
+
+Random-effects GLS regression                   Number of obs     =        325
+Group variable: country                         Number of groups  =         13
+
+R-sq:                                           Obs per group:
+     within  = 0.2507                                         min =         25
+     between = 0.7194                                         avg =       25.0
+     overall = 0.3390                                         max =         25
+
+                                                Wald chi2(8)      =    3988.50
+corr(u_i, X)   = 0 (assumed)                    Prob > chi2       =     0.0000
+
+                               (Std. Err. adjusted for 13 clusters in country)
+------------------------------------------------------------------------------
+             |               Robust
+       GDPgr |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .1336842   .0391823     3.41   0.001     .0568883      .21048
+        debt |  -.0173565   .0064779    -2.68   0.007    -.0300531     -.00466
+       gr_lf |   .3464543   .0976804     3.55   0.000     .1550043    .5379044
+   inflation |  -.0093996   .0005163   -18.21   0.000    -.0104116   -.0083877
+         tax |   .1406553   .0563598     2.50   0.013     .0301922    .2511184
+       ggfce |   .0574508    .058508     0.98   0.326    -.0572228    .1721244
+   pollution |   .1474257   .0461874     3.19   0.001     .0569001    .2379514
+      dTrade |   .0738873   .0284025     2.60   0.009     .0182195    .1295551
+       _cons |   -5.47658   1.788919    -3.06   0.002    -8.982796   -1.970364
+-------------+----------------------------------------------------------------
+     sigma_u |          0
+     sigma_e |  2.4941683
+         rho |          0   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+.  estimates store ReRobust
+
+.  estimates table ols olsRobust Fe FeRobust Re ReRobust, star stats(N F Wald chi2 test r2 r2_
+> b r2_w sigma_u sigma_e)
+
+----------------------------------------------------------------------------------------------
+    Variable |      ols          olsRobust          Fe           FeRobust           Re        
+-------------+--------------------------------------------------------------------------------
+        GFCF |  .13368415***    .13368415***    .03009068       .03009068       .13368415***  
+        debt | -.01735654***   -.01735654***   -.03091903***   -.03091903      -.01735654***  
+       gr_lf |  .34645432***    .34645432***    .14549885       .14549885       .34645432***  
+   inflation | -.00939963***   -.00939963***   -.01052522***   -.01052522***   -.00939963***  
+         tax |  .14065531***    .14065531***    .38087955***    .38087955**     .14065531***  
+       ggfce |  .05745077       .05745077      -.10401358      -.10401358       .05745077     
+   pollution |  .14742574***    .14742574***     .0103019        .0103019       .14742574***  
+      dTrade |  .07388729***    .07388729***   -.04216444      -.04216444       .07388729***  
+       _cons | -5.4765798***   -5.4765798***    -1.049703       -1.049703      -5.4765798***  
+-------------+--------------------------------------------------------------------------------
+           N |        325             325             325             325             325     
+           F |  20.255525       17.882028       16.969572       9272.5841                     
+        Wald |                                                                                
+        chi2 |                                                                   162.0442     
+        test |                                                                                
+          r2 |  .33897326       .33897326       .30870847       .30870847                     
+        r2_b |                                  .04058749       .04058749       .71943795     
+        r2_w |                                  .30870847       .30870847       .25070894     
+     sigma_u |                                  2.3313242       2.3313242               0     
+     sigma_e |                                  2.4941683       2.4941683       2.4941683     
+----------------------------------------------------------------------------------------------
+                                                      legend: * p<0.05; ** p<0.01; *** p<0.001
+
+
+------------------------------
+    Variable |   ReRobust     
+-------------+----------------
+        GFCF |  .13368415***  
+        debt | -.01735654**   
+       gr_lf |  .34645432***  
+   inflation | -.00939963***  
+         tax |  .14065531*    
+       ggfce |  .05745077     
+   pollution |  .14742574**   
+      dTrade |  .07388729**   
+       _cons | -5.4765798**   
+-------------+----------------
+           N |        325     
+           F |                
+        Wald |                
+        chi2 |  3988.4993     
+        test |                
+          r2 |                
+        r2_b |  .71943795     
+        r2_w |  .25070894     
+     sigma_u |          0     
+     sigma_e |  2.4941683     
+------------------------------
+legend: * p<0.05; ** p<0.01; *** p<0.001
+
+.  hausman Fe Re
+
+                 ---- Coefficients ----
+             |      (b)          (B)            (b-B)     sqrt(diag(V_b-V_B))
+             |       Fe           Re         Difference          S.E.
+-------------+----------------------------------------------------------------
+        GFCF |    .0300907     .1336842       -.1035935        .0475573
+        debt |    -.030919    -.0173565       -.0135625         .007919
+       gr_lf |    .1454988     .3464543       -.2009555        .0573491
+   inflation |   -.0105252    -.0093996       -.0011256        .0001591
+         tax |    .3808796     .1406553        .2402242        .0646624
+       ggfce |   -.1040136     .0574508       -.1614644        .0874245
+   pollution |    .0103019     .1474257       -.1371238        .1213368
+      dTrade |   -.0421644     .0738873       -.1160517        .0394561
+------------------------------------------------------------------------------
+                           b = consistent under Ho and Ha; obtained from xtreg
+            B = inconsistent under Ha, efficient under Ho; obtained from xtreg
+
+    Test:  Ho:  difference in coefficients not systematic
+
+                  chi2(8) = (b-B)'[(V_b-V_B)^(-1)](b-B)
+                          =       25.99
+                Prob>chi2 =      0.0011
+                (V_b-V_B is not positive definite)
+
+.         
+.  xtreg GDPgr GFCF debt gr_lf dTrade ggfce inflation pollution tax,fe    
+
+Fixed-effects (within) regression               Number of obs     =        325
+Group variable: country                         Number of groups  =         13
+
+R-sq:                                           Obs per group:
+     within  = 0.3087                                         min =         25
+     between = 0.0406                                         avg =       25.0
+     overall = 0.1430                                         max =         25
+
+                                                F(8,304)          =      16.97
+corr(u_i, Xb)  = -0.6194                        Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .0300907   .0569481     0.53   0.598    -.0819717     .142153
+        debt |   -.030919     .00866    -3.57   0.000    -.0479601   -.0138779
+       gr_lf |   .1454988   .1118795     1.30   0.194    -.0746574    .3656551
+      dTrade |  -.0421644   .0426986    -0.99   0.324    -.1261867    .0418578
+       ggfce |  -.1040136   .0973563    -1.07   0.286    -.2955912     .087564
+   inflation |  -.0105252   .0013236    -7.95   0.000    -.0131298   -.0079207
+   pollution |   .0103019   .1244575     0.08   0.934    -.2346054    .2552092
+         tax |   .3808796   .0734528     5.19   0.000     .2363394    .5254197
+       _cons |  -1.049703   3.282676    -0.32   0.749    -7.509347    5.409941
+-------------+----------------------------------------------------------------
+     sigma_u |  2.3313242
+     sigma_e |  2.4941683
+         rho |  .46629177   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0: F(12, 304) = 4.59                     Prob > F = 0.0000
+
+.  xttest3
+
+Modified Wald test for groupwise heteroskedasticity
+in fixed effect regression model
+
+H0: sigma(i)^2 = sigma^2 for all i
+
+chi2 (13)  =     510.98
+Prob>chi2 =      0.0000
+
+
+. 
+. 
+.         // IV test:
+.         
+.         
+.  corr debt GFCF gr_lf inflation tax ggfce dTrade GFCFann fdi lf lf1564 trade Pop65 Popgr rur
+> al tnrr Exports Imports Inflationconsumerpricesannu DIR Savings RIR debt2   
+(obs=311)
+
+             |     debt     GFCF    gr_lf inflat~n      tax    ggfce   dTrade  GFCFann
+-------------+------------------------------------------------------------------------
+        debt |   1.0000
+        GFCF |  -0.2304   1.0000
+       gr_lf |  -0.1986   0.1150   1.0000
+   inflation |  -0.0444   0.1217  -0.0727   1.0000
+         tax |   0.1680  -0.0268  -0.0584   0.0948   1.0000
+       ggfce |   0.3503  -0.0909  -0.3029   0.0757   0.6575   1.0000
+      dTrade |   0.0365   0.1353  -0.1839  -0.0617  -0.2466  -0.2542   1.0000
+     GFCFann |  -0.2085   0.2490   0.1823  -0.1360   0.1025  -0.0687  -0.0439   1.0000
+         fdi |   0.0493   0.1981   0.1573  -0.0449   0.0191  -0.1359   0.2307   0.0368
+          lf |   0.3988   0.0702  -0.2588  -0.0426  -0.3417   0.1336   0.1011  -0.1147
+      lf1564 |  -0.1802   0.1747  -0.2795  -0.0119  -0.0971  -0.1308   0.5674   0.0178
+       trade |   0.0879   0.2910   0.2301  -0.0156  -0.0270  -0.2410   0.5323   0.1070
+       Pop65 |   0.3653  -0.0186  -0.5714  -0.0021   0.0883   0.4374   0.3304  -0.1118
+       Popgr |  -0.2249   0.1026   0.7661  -0.1014  -0.1304  -0.3310  -0.2539   0.1116
+       rural |  -0.2628  -0.4053  -0.0500   0.0784  -0.0831  -0.2128  -0.4447  -0.0551
+        tnrr |  -0.3713   0.0501   0.0940   0.0638   0.2454   0.0142  -0.1549   0.0091
+     Exports |   0.0980   0.3030   0.2081   0.0292  -0.0863  -0.3106   0.6345   0.0785
+     Imports |   0.1031   0.3118   0.2976   0.0526  -0.0261  -0.2848   0.4369   0.1046
+Inflationc~u |  -0.0328   0.1152  -0.0700   0.9984   0.0948   0.0742  -0.0603  -0.1449
+         DIR |  -0.1822   0.0827  -0.1182   0.7471   0.2095   0.2095  -0.1771  -0.1769
+     Savings |  -0.0944   0.5306  -0.1048  -0.0143  -0.2457  -0.2746   0.8951   0.0835
+         RIR |   0.0004  -0.1531   0.0794  -0.0276  -0.1808   0.0137  -0.1105  -0.1035
+       debt2 |   0.9493  -0.2655  -0.2400  -0.0467   0.1065   0.2938   0.0262  -0.2025
+
+             |      fdi       lf   lf1564    trade    Pop65    Popgr    rural     tnrr
+-------------+------------------------------------------------------------------------
+         fdi |   1.0000
+          lf |  -0.1851   1.0000
+      lf1564 |  -0.0646   0.0848   1.0000
+       trade |   0.4931  -0.2871  -0.0938   1.0000
+       Pop65 |  -0.1819   0.5345   0.3637  -0.2304   1.0000
+       Popgr |   0.1581  -0.2760  -0.3529   0.1910  -0.6995   1.0000
+       rural |  -0.2300  -0.1412  -0.2868  -0.3422  -0.1375  -0.1374   1.0000
+        tnrr |  -0.0671  -0.0690  -0.0332  -0.1425  -0.0862   0.1484   0.1060   1.0000
+     Exports |   0.5021  -0.2981   0.0433   0.9694  -0.2242   0.1837  -0.4260  -0.2016
+     Imports |   0.5147  -0.3774  -0.1206   0.9677  -0.3606   0.2903  -0.3617  -0.1880
+Inflationc~u |  -0.0434  -0.0368  -0.0129  -0.0187  -0.0003  -0.0948   0.0756   0.0589
+         DIR |  -0.0698  -0.1845  -0.1043  -0.0173  -0.0585  -0.1691   0.2133   0.1241
+     Savings |   0.2823   0.0889   0.5622   0.5610   0.2522  -0.1700  -0.5486  -0.1299
+         RIR |  -0.0762   0.0207  -0.2427  -0.1799  -0.0586   0.1581   0.0357  -0.1612
+       debt2 |  -0.0248   0.4636  -0.0896  -0.0163   0.4428  -0.2799  -0.2035  -0.2699
+
+             |  Exports  Imports Inflat~u      DIR  Savings      RIR    debt2
+-------------+---------------------------------------------------------------
+     Exports |   1.0000
+     Imports |   0.9725   1.0000
+Inflationc~u |   0.0284   0.0512   1.0000
+         DIR |  -0.0455   0.0005   0.7305   1.0000
+     Savings |   0.6599   0.4981  -0.0169  -0.1168   1.0000
+         RIR |  -0.1669  -0.1609  -0.0234  -0.0113  -0.1620   1.0000
+       debt2 |  -0.0053  -0.0140  -0.0378  -0.1733  -0.1136  -0.0113   1.0000
+
+
+.  // DIR : 0.7471
+.  xtivreg2 GDPgr debt gr_lf ggfce GFCF pollution dTrade tax (inflation= L.inflation L2.inflat
+> ion L3.inflation L4.inflation DIR  ), endog(inflation) fe 
+
+FIXED EFFECTS ESTIMATION
+------------------------
+Number of groups =        13                    Obs per group: min =        22
+                                                               avg =      22.0
+                                                               max =        22
+
+IV (2SLS) estimation
+--------------------
+
+Estimates efficient for homoskedasticity only
+Statistics consistent for homoskedasticity only
+
+                                                      Number of obs =      286
+                                                      F(  8,   265) =     9.27
+                                                      Prob > F      =   0.0000
+Total (centered) SS     =  2138.209785                Centered R2   =   0.2179
+Total (uncentered) SS   =  2138.209785                Uncentered R2 =   0.2179
+Residual SS             =  1672.252349                Root MSE      =    2.475
+
+------------------------------------------------------------------------------
+       GDPgr |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   inflation |   .0072352   .0117142     0.62   0.537    -.0157241    .0301946
+        debt |  -.0396661   .0099334    -3.99   0.000    -.0591353    -.020197
+       gr_lf |   .0929827   .1226406     0.76   0.448    -.1473886    .3333539
+       ggfce |  -.0886244   .1092754    -0.81   0.417    -.3028004    .1255515
+        GFCF |  -.0097948   .0673361    -0.15   0.884    -.1417711    .1221815
+   pollution |  -.0187194   .1296283    -0.14   0.885    -.2727862    .2353474
+      dTrade |  -.0535053   .0491684    -1.09   0.277    -.1498737     .042863
+         tax |   .4303475   .0791641     5.44   0.000     .2751886    .5855064
+------------------------------------------------------------------------------
+Underidentification test (Anderson canon. corr. LM statistic):         109.463
+                                                   Chi-sq(5) P-val =    0.0000
+------------------------------------------------------------------------------
+Weak identification test (Cragg-Donald Wald F statistic):               34.940
+Stock-Yogo weak ID test critical values:  5% maximal IV relative bias    18.37
+                                         10% maximal IV relative bias    10.83
+                                         20% maximal IV relative bias     6.77
+                                         30% maximal IV relative bias     5.25
+                                         10% maximal IV size             26.87
+                                         15% maximal IV size             15.09
+                                         20% maximal IV size             10.98
+                                         25% maximal IV size              8.84
+Source: Stock-Yogo (2005).  Reproduced by permission.
+------------------------------------------------------------------------------
+Sargan statistic (overidentification test of all instruments):          14.778
+                                                   Chi-sq(4) P-val =    0.0052
+-endog- option:
+Endogeneity test of endogenous regressors:                               0.139
+                                                   Chi-sq(1) P-val =    0.7097
+Regressors tested:    inflation
+------------------------------------------------------------------------------
+Instrumented:         inflation
+Included instruments: debt gr_lf ggfce GFCF pollution dTrade tax
+Excluded instruments: L.inflation L2.inflation L3.inflation L4.inflation DIR
+------------------------------------------------------------------------------
+
+.  estimates store IV_Fe
+
+.  xtivreg2 GDPgr debt gr_lf ggfce GFCF pollution dTrade tax (inflation= L.inflation L2.inflat
+> ion L3.inflation L4.inflation DIR  ), endog(inflation) fe robust
+
+FIXED EFFECTS ESTIMATION
+------------------------
+Number of groups =        13                    Obs per group: min =        22
+                                                               avg =      22.0
+                                                               max =        22
+
+IV (2SLS) estimation
+--------------------
+
+Estimates efficient for homoskedasticity only
+Statistics robust to heteroskedasticity
+
+                                                      Number of obs =      286
+                                                      F(  8,   265) =     8.37
+                                                      Prob > F      =   0.0000
+Total (centered) SS     =  2138.209785                Centered R2   =   0.2179
+Total (uncentered) SS   =  2138.209785                Uncentered R2 =   0.2179
+Residual SS             =  1672.252349                Root MSE      =    2.475
+
+------------------------------------------------------------------------------
+             |               Robust
+       GDPgr |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   inflation |   .0072352    .011711     0.62   0.537     -.015718    .0301884
+        debt |  -.0396661   .0101882    -3.89   0.000    -.0596346   -.0196977
+       gr_lf |   .0929827   .1036541     0.90   0.370    -.1101757    .2961411
+       ggfce |  -.0886244   .0980753    -0.90   0.366    -.2808485    .1035996
+        GFCF |  -.0097948   .0772179    -0.13   0.899     -.161139    .1415494
+   pollution |  -.0187194   .1158029    -0.16   0.872    -.2456889    .2082501
+      dTrade |  -.0535053   .0442113    -1.21   0.226    -.1401579    .0331472
+         tax |   .4303475   .0744395     5.78   0.000     .2844488    .5762462
+------------------------------------------------------------------------------
+Underidentification test (Kleibergen-Paap rk LM statistic):             16.876
+                                                   Chi-sq(5) P-val =    0.0047
+------------------------------------------------------------------------------
+Weak identification test (Cragg-Donald Wald F statistic):               34.940
+                         (Kleibergen-Paap rk Wald F statistic):         12.304
+Stock-Yogo weak ID test critical values:  5% maximal IV relative bias    18.37
+                                         10% maximal IV relative bias    10.83
+                                         20% maximal IV relative bias     6.77
+                                         30% maximal IV relative bias     5.25
+                                         10% maximal IV size             26.87
+                                         15% maximal IV size             15.09
+                                         20% maximal IV size             10.98
+                                         25% maximal IV size              8.84
+Source: Stock-Yogo (2005).  Reproduced by permission.
+NB: Critical values are for Cragg-Donald F statistic and i.i.d. errors.
+------------------------------------------------------------------------------
+Hansen J statistic (overidentification test of all instruments):         8.344
+                                                   Chi-sq(4) P-val =    0.0798
+-endog- option:
+Endogeneity test of endogenous regressors:                               0.021
+                                                   Chi-sq(1) P-val =    0.8860
+Regressors tested:    inflation
+------------------------------------------------------------------------------
+Instrumented:         inflation
+Included instruments: debt gr_lf ggfce GFCF pollution dTrade tax
+Excluded instruments: L.inflation L2.inflation L3.inflation L4.inflation DIR
+------------------------------------------------------------------------------
+
+.  estimates store IV_FeRobust
+
+.  estimates table IV_Fe IV_FeRobust , star stats(N F r2 sigma_e)
+
+----------------------------------------------
+    Variable |     IV_Fe        IV_FeRobust   
+-------------+--------------------------------
+   inflation |  .00723522       .00723522     
+        debt | -.03966615***   -.03966615***  
+       gr_lf |  .09298268       .09298268     
+       ggfce | -.08862444      -.08862444     
+        GFCF | -.00979478      -.00979478     
+   pollution | -.01871939      -.01871939     
+      dTrade | -.05350532      -.05350532     
+         tax |   .4303475***     .4303475***  
+-------------+--------------------------------
+           N |        286             286     
+           F |  9.2684878       8.3749103     
+          r2 |  .21791942       .21791942     
+     sigma_e |   2.474968        2.474968     
+----------------------------------------------
+      legend: * p<0.05; ** p<0.01; *** p<0.001
+
+. 
+.           
+. 
+.       // Run regression for different inflation levels
+.  
+. 
+. ***** inflation < 0% ******
+. 
+. sum inflation, detail
+
+             Inflation, GDP deflator (annual %)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -1.895164       -4.08393
+ 5%    -1.037435      -3.582965
+10%    -.4964871        -2.3523       Obs                 338
+25%     .7983561      -1.895164       Sum of Wgt.         338
+
+50%      3.07681                      Mean           18.14186
+                        Largest       Std. Dev.       126.862
+75%     6.449502       316.7934
+90%     13.76724       661.5041       Variance       16093.97
+95%     26.73279       1058.714       Skewness       12.49806
+99%     316.7934       1945.749       Kurtosis       174.1784
+
+. gen inflation_negative = 0
+
+. replace inflation_negative=1 if inflation<0
+(55 real changes made)
+
+. xtreg GDPgr GFCF debt gr_lf dTrade ggfce inflation pollution tax if inflation_negative == 1,
+>  fe robust
+
+Fixed-effects (within) regression               Number of obs     =         54
+Group variable: country                         Number of groups  =         10
+
+R-sq:                                           Obs per group:
+     within  = 0.4589                                         min =          1
+     between = 0.0647                                         avg =        5.4
+     overall = 0.0064                                         max =         20
+
+                                                F(7,9)            =          .
+corr(u_i, Xb)  = -0.9680                        Prob > F          =          .
+
+                               (Std. Err. adjusted for 10 clusters in country)
+------------------------------------------------------------------------------
+             |               Robust
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |  -.6067507    .146597    -4.14   0.003    -.9383763   -.2751252
+        debt |   .0257894   .0243486     1.06   0.317    -.0292909    .0808697
+       gr_lf |  -.5455465   .1493648    -3.65   0.005    -.8834331   -.2076599
+      dTrade |  -.0849272   .1188887    -0.71   0.493    -.3538722    .1840177
+       ggfce |  -1.653593   .6962848    -2.37   0.042    -3.228699   -.0784873
+   inflation |  -.6308514   .3722204    -1.69   0.124    -1.472873    .2111697
+   pollution |   .0875338   .2436829     0.36   0.728    -.4637151    .6387828
+         tax |   1.311333   .3495679     3.75   0.005     .5205554     2.10211
+       _cons |    21.4647   14.45647     1.48   0.172    -11.23809     54.1675
+-------------+----------------------------------------------------------------
+     sigma_u |  8.4219106
+     sigma_e |  1.8006694
+         rho |  .95628465   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+. 
+.  
+. 
+. ***** 0% > inflation_0_3 > 3% *****
+. 
+. sum inflation, detail
+
+             Inflation, GDP deflator (annual %)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -1.895164       -4.08393
+ 5%    -1.037435      -3.582965
+10%    -.4964871        -2.3523       Obs                 338
+25%     .7983561      -1.895164       Sum of Wgt.         338
+
+50%      3.07681                      Mean           18.14186
+                        Largest       Std. Dev.       126.862
+75%     6.449502       316.7934
+90%     13.76724       661.5041       Variance       16093.97
+95%     26.73279       1058.714       Skewness       12.49806
+99%     316.7934       1945.749       Kurtosis       174.1784
+
+. gen inflation_0_3 = 0
+
+. replace inflation_0_3 = 1 if inflation<3 & inflation>0
+(111 real changes made)
+
+. xtreg GDPgr GFCF debt gr_lf dTrade ggfce inflation pollution tax if inflation_0_3 == 1, fe r
+> obust
+
+Fixed-effects (within) regression               Number of obs     =        106
+Group variable: country                         Number of groups  =         11
+
+R-sq:                                           Obs per group:
+     within  = 0.2050                                         min =          1
+     between = 0.1571                                         avg =        9.6
+     overall = 0.1730                                         max =         17
+
+                                                F(8,10)           =       9.98
+corr(u_i, Xb)  = -0.4483                        Prob > F          =     0.0007
+
+                               (Std. Err. adjusted for 11 clusters in country)
+------------------------------------------------------------------------------
+             |               Robust
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .0628066    .164442     0.38   0.710    -.3035931    .4292063
+        debt |  -.0118343   .0257254    -0.46   0.655    -.0691542    .0454855
+       gr_lf |   .1008037   .3981612     0.25   0.805    -.7863548    .9879622
+      dTrade |   .0377781   .0830584     0.45   0.659    -.1472876    .2228439
+       ggfce |   -.194137    .254329    -0.76   0.463    -.7608174    .3725435
+   inflation |   .0565709   .3527296     0.16   0.876    -.7293597    .8425015
+   pollution |  -.0200016   .3329062    -0.06   0.953     -.761763    .7217597
+         tax |   .4577093   .1435152     3.19   0.010     .1379375     .777481
+       _cons |   -2.20762   5.592061    -0.39   0.701    -14.66751    10.25227
+-------------+----------------------------------------------------------------
+     sigma_u |  2.3001741
+     sigma_e |  2.3156062
+         rho |   .4966567   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+. 
+. 
+. 
+. ***** 3% < Inflation_3_15 < 15% ******
+. 
+. sum inflation, detail
+
+             Inflation, GDP deflator (annual %)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -1.895164       -4.08393
+ 5%    -1.037435      -3.582965
+10%    -.4964871        -2.3523       Obs                 338
+25%     .7983561      -1.895164       Sum of Wgt.         338
+
+50%      3.07681                      Mean           18.14186
+                        Largest       Std. Dev.       126.862
+75%     6.449502       316.7934
+90%     13.76724       661.5041       Variance       16093.97
+95%     26.73279       1058.714       Skewness       12.49806
+99%     316.7934       1945.749       Kurtosis       174.1784
+
+. gen inflation_3_15 = 0
+
+. replace inflation_3_15 =1 if inflation>3 & inflation<15
+(142 real changes made)
+
+. xtreg GDPgr GFCF debt gr_lf dTrade ggfce inflation pollution tax if inflation_3_15 == 1, fe 
+> robust
+
+Fixed-effects (within) regression               Number of obs     =        138
+Group variable: country                         Number of groups  =         11
+
+R-sq:                                           Obs per group:
+     within  = 0.3353                                         min =          6
+     between = 0.1470                                         avg =       12.5
+     overall = 0.0188                                         max =         23
+
+                                                F(8,10)           =      19.43
+corr(u_i, Xb)  = -0.6474                        Prob > F          =     0.0000
+
+                               (Std. Err. adjusted for 11 clusters in country)
+------------------------------------------------------------------------------
+             |               Robust
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .1564856   .0800089     1.96   0.079    -.0217854    .3347566
+        debt |  -.0338988   .0251433    -1.35   0.207    -.0899215     .022124
+       gr_lf |   .0632046   .0988976     0.64   0.537    -.1571531    .2835623
+      dTrade |  -.0439935   .0515108    -0.85   0.413    -.1587666    .0707797
+       ggfce |  -.1844904   .2201866    -0.84   0.422    -.6750968    .3061161
+   inflation |  -.0295724   .1507756    -0.20   0.848    -.3655213    .3063765
+   pollution |  -.1028265   .1752387    -0.59   0.570    -.4932826    .2876296
+         tax |   .3470749   .1908866     1.82   0.099     -.078247    .7723968
+       _cons |   -.049972    6.02448    -0.01   0.994    -13.47335    13.37341
+-------------+----------------------------------------------------------------
+     sigma_u |  2.9962773
+     sigma_e |  2.0624724
+         rho |  .67850948   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+. 
+. 
+. *****   inflation > 15%  ******
+. 
+. sum inflation, detail
+
+             Inflation, GDP deflator (annual %)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -1.895164       -4.08393
+ 5%    -1.037435      -3.582965
+10%    -.4964871        -2.3523       Obs                 338
+25%     .7983561      -1.895164       Sum of Wgt.         338
+
+50%      3.07681                      Mean           18.14186
+                        Largest       Std. Dev.       126.862
+75%     6.449502       316.7934
+90%     13.76724       661.5041       Variance       16093.97
+95%     26.73279       1058.714       Skewness       12.49806
+99%     316.7934       1945.749       Kurtosis       174.1784
+
+. gen inflation_15plus = 0
+
+. replace inflation_15plus=1 if inflation>15
+(30 real changes made)
+
+. xtreg GDPgr GFCF debt gr_lf dTrade ggfce inflation pollution tax if inflation_15plus == 1, f
+> e robust
+
+Fixed-effects (within) regression               Number of obs     =         27
+Group variable: country                         Number of groups  =          5
+
+R-sq:                                           Obs per group:
+     within  = 0.8127                                         min =          1
+     between = 0.9533                                         avg =        5.4
+     overall = 0.3687                                         max =         18
+
+                                                F(2,4)            =          .
+corr(u_i, Xb)  = -0.8625                        Prob > F          =          .
+
+                                (Std. Err. adjusted for 5 clusters in country)
+------------------------------------------------------------------------------
+             |               Robust
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .6568946   .3677662     1.79   0.149    -.3641881    1.677977
+        debt |   .0530279   .0838061     0.63   0.561     -.179655    .2857109
+       gr_lf |   3.179243   .2940469    10.81   0.000     2.362838    3.995648
+      dTrade |  -.1902835   .0863882    -2.20   0.092    -.4301354    .0495685
+       ggfce |   1.139308   .9338189     1.22   0.289    -1.453389    3.732005
+   inflation |  -.0173154    .003655    -4.74   0.009    -.0274634   -.0071675
+   pollution |   1.208253   .7629168     1.58   0.188    -.9099439    3.326449
+         tax |   .3148436   .1203934     2.62   0.059    -.0194219    .6491092
+       _cons |  -67.59401   12.35718    -5.47   0.005     -101.903   -33.28498
+-------------+----------------------------------------------------------------
+     sigma_u |  17.197279
+     sigma_e |  3.1781129
+         rho |  .96697562   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+. 
+. 
+.            //DroplinePlot of GDP Growth on Inflation levels by Country
+. twoway (dropline GDPgr year if inflation <0, mcolor(white) msize(small) msymbol(circle) lcol
+> or(white)) (dropline GDPgr year if inflation >0 &  inflation <3, mcolor("172 128 68") msize(
+> small) msymbol(circle) lcolor("172 128 68")) (dropline GDPgr year if inflation >3 &  inflati
+> on <15, mcolor(green) msize(small) msymbol(circle) lcolor(green)) (dropline GDPgr year if in
+> flation >15, mcolor(red) msize(small) msymbol(circle) lcolor(red)), ytitle(GDP Growth (% ann
+> ual)) ytitle(, size(small) color("172 128 68")) ylabel(, labels labsize(small) labcolor("172
+>  128 68") angle(horizontal) ticks tlcolor("172 128 68") grid glcolor("172 128 68") gmin gmax
+>  gextend) xtitle(Year) xtitle(, size(small) color("172 128 68")) xlabel(, labels labcolor("1
+> 72 128 68") ticks tlcolor("172 128 68") grid glcolor("172 128 68") gmin gmax gextend) by(, t
+> itle("", nobox)) by(, graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black))
+>  plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black))) by(country, yrescale
+>  xrescale iyaxes ixaxes iytick ixtick iylabel ixlabel noiytitle noixtitle) subtitle(, size(s
+> mall) color("172 128 68") box fcolor(white) lcolor("172 128 68")) graphregion(fcolor(black) 
+> lcolor(black) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(
+> black) ilcolor(black))
+
+. 
+. 
+. *** OUTLIERS***
+. 
+. /* Graphically:*/
+. reg GDPgr GFCF debt gr_lf dTrade ggfce inflation pollution tax
+
+      Source |       SS           df       MS      Number of obs   =       325
+-------------+----------------------------------   F(8, 316)       =     20.26
+       Model |  1145.56935         8  143.196169   Prob > F        =    0.0000
+    Residual |  2233.95781       316  7.06948674   R-squared       =    0.3390
+-------------+----------------------------------   Adj R-squared   =    0.3222
+       Total |  3379.52716       324  10.4306394   Root MSE        =    2.6589
+
+------------------------------------------------------------------------------
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .1336842   .0313271     4.27   0.000      .072048    .1953203
+        debt |  -.0173565   .0035049    -4.95   0.000    -.0242524   -.0104607
+       gr_lf |   .3464543    .096063     3.61   0.000     .1574505    .5354581
+      dTrade |   .0738873   .0163214     4.53   0.000      .041775    .1059996
+       ggfce |   .0574508   .0428394     1.34   0.181    -.0268358    .1417373
+   inflation |  -.0093996    .001314    -7.15   0.000    -.0119849   -.0068144
+   pollution |   .1474257   .0276957     5.32   0.000     .0929345    .2019169
+         tax |   .1406553   .0348437     4.04   0.000     .0721004    .2092103
+       _cons |   -5.47658    1.25604    -4.36   0.000    -7.947839   -3.005321
+------------------------------------------------------------------------------
+
+. twoway (scatter u_hat GDPgr_hat, mcolor("175 129 58") msize(small) msymbol(circle)), ytitle(
+>  u_hat ) ytitle(, size(small) color("175 129 58")) yscale(noline) ylabel(#1, labels labsize(
+> small) labcolor("175 129 58") angle(horizontal) noticks grid glcolor("175 129 58") gmin gmax
+>  nogextend) xtitle( GDPgr_hat ) xtitle(, size(medsmall) color("175 129 58")) xlabel(minmax, 
+> labels labsize(small) labcolor("175 129 58") ticks tlcolor("175 129 58") grid glcolor("175 1
+> 29 58") gmin gmax gextend) graphregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(bl
+> ack)) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilcolor(black))
+
+. avplot GFCF
+
+. avplot debt
+
+. avplot dTrade
+
+. avplot ggfce
+
+. avplot gr_lf
+
+. avplot inflation
+
+. avplot pollution
+
+. avplot tax
+
+. 
+. //with outliers
+. reg GDPgr GFCF debt gr_lf dTrade ggfce inflation pollution tax
+
+      Source |       SS           df       MS      Number of obs   =       325
+-------------+----------------------------------   F(8, 316)       =     20.26
+       Model |  1145.56935         8  143.196169   Prob > F        =    0.0000
+    Residual |  2233.95781       316  7.06948674   R-squared       =    0.3390
+-------------+----------------------------------   Adj R-squared   =    0.3222
+       Total |  3379.52716       324  10.4306394   Root MSE        =    2.6589
+
+------------------------------------------------------------------------------
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .1336842   .0313271     4.27   0.000      .072048    .1953203
+        debt |  -.0173565   .0035049    -4.95   0.000    -.0242524   -.0104607
+       gr_lf |   .3464543    .096063     3.61   0.000     .1574505    .5354581
+      dTrade |   .0738873   .0163214     4.53   0.000      .041775    .1059996
+       ggfce |   .0574508   .0428394     1.34   0.181    -.0268358    .1417373
+   inflation |  -.0093996    .001314    -7.15   0.000    -.0119849   -.0068144
+   pollution |   .1474257   .0276957     5.32   0.000     .0929345    .2019169
+         tax |   .1406553   .0348437     4.04   0.000     .0721004    .2092103
+       _cons |   -5.47658    1.25604    -4.36   0.000    -7.947839   -3.005321
+------------------------------------------------------------------------------
+
+.  
+. 
+. 
+. //Ανίχνευση των outliers:
+. lvr2plot, recast(scatter) mcolor("175 129 58") msize(tiny) msymbol(circle) mlabel(country) m
+> labsize(tiny) mlabcolor("175 129 58") mlabposition(9) mlabangle(zero) ytitle(, size(small) c
+> olor("175 129 58")) ylabel(, labels labsize(small) labcolor("175 129 58") angle(horizontal) 
+> ticks tlcolor("175 129 58") tlength(tiny) tlwidth(thin) grid glwidth(thin) glcolor("175 129 
+> 58") gmin gmax nogextend) xtitle(, size(small) color("175 129 58")) xlabel(, labels labsize(
+> small) labcolor("175 129 58") ticks tlcolor("175 129 58") tlength(tiny) tlwidth(thin) grid g
+> lwidth(thin) glcolor("175 129 58") gmin gmax nogextend) graphregion(fcolor(black) lcolor(bla
+> ck) ifcolor(black) ilcolor(black)) plotregion(fcolor(black) lcolor(black) ifcolor(black) ilc
+> olor(black))
+
+. 
+. drop in 55
+(1 observation deleted)
+
+. drop in 125
+(1 observation deleted)
+
+. drop in 276
+(1 observation deleted)
+
+. drop in 278
+(1 observation deleted)
+
+. drop in 266
+(1 observation deleted)
+
+. drop in 274
+(1 observation deleted)
+
+. // αν "drop in 54"  τεράστια αλλαγή στο inflation με fe robust
+. 
+. //without outliers
+. reg GDPgr GFCF debt gr_lf dTrade ggfce inflation pollution tax
+
+      Source |       SS           df       MS      Number of obs   =       319
+-------------+----------------------------------   F(8, 310)       =     19.54
+       Model |  1010.40003         8  126.300004   Prob > F        =    0.0000
+    Residual |  2003.77001       310  6.46377424   R-squared       =    0.3352
+-------------+----------------------------------   Adj R-squared   =    0.3181
+       Total |  3014.17004       318  9.47852215   Root MSE        =    2.5424
+
+------------------------------------------------------------------------------
+       GDPgr |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+        GFCF |   .1280764   .0304234     4.21   0.000      .068214    .1879387
+        debt |  -.0189466   .0033964    -5.58   0.000    -.0256295   -.0122637
+       gr_lf |    .323506   .0925053     3.50   0.001     .1414884    .5055237
+      dTrade |   .0679147   .0161396     4.21   0.000     .0361578    .0996717
+       ggfce |   .0725722   .0411659     1.76   0.079    -.0084278    .1535722
+   inflation |  -.0079747   .0013168    -6.06   0.000    -.0105658   -.0053836
+   pollution |   .1438506   .0267212     5.38   0.000     .0912727    .1964285
+         tax |    .134954   .0334411     4.04   0.000     .0691538    .2007542
+       _cons |  -5.335686   1.216404    -4.39   0.000    -7.729138   -2.942234
+------------------------------------------------------------------------------
+
+. 
+. 
+end of do-file
+
+. log close
+      name:  <unnamed>
+       log:  /Users/levantisgio/Desktop/solo.log
+  log type:  text
+ closed on:   9 Jun 2020, 19:40:02
+----------------------------------------------------------------------------------------------
