@@ -1,4 +1,4 @@
-This is an empirical analysis of 13 countries (1993-2018) with different levels of Inflation 
+This is an empirical analysis of 13 countries (1993-2018) with different levels of Inflation rate 
 in order to get insights of how much this affects the growth of the economy using Stata.
 
 This study aims to answer the relationship between inflation and economic growth 
